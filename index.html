@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Workout</title>
+<style>
+  :root{
+    --bg:#000;
+    --text:#eee;
+    --dim:#555;
+    --line:#2a2a2a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);}
+  body{
+    color:var(--text);
+    font-family: -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    letter-spacing:0.01em;
+    -webkit-tap-highlight-color:transparent;
+  }
+  input{font-family:inherit;}
+  #app{max-width:520px;margin:0 auto;padding:10px 10px 70px;}
+
+  .tabs{
+    display:flex;justify-content:space-between;align-items:baseline;
+    position:sticky;top:0;z-index:10;
+    background:var(--bg);
+    padding:10px 0 10px;
+    margin:-10px -10px 4px;
+    padding-left:10px;padding-right:10px;
+    border-bottom:1px solid var(--line);
+  }
+  .tab{color:var(--dim);font-size:15px;background:none;border:none;padding:6px 4px;}
+  .tab.active{color:var(--text);border-bottom:2px solid var(--text);}
+
+  .colhead{
+    display:flex;align-items:center;font-size:10px;color:var(--dim);
+    padding:0 0 4px;border-bottom:1px solid var(--line);margin-bottom:2px;
+  }
+  .ch-tag{width:26px;flex:none;}
+  .ch-name{flex:1 1 auto;}
+  .ch-scheme{width:44px;flex:none;text-align:center;}
+  .ch-prev{width:34px;flex:none;text-align:center;}
+  .ch-done{width:20px;flex:none;text-align:center;}
+
+  .ex-block{border-bottom:1px solid var(--line);}
+  .ex-row{
+    display:flex;align-items:center;
+    padding:8px 0;
+  }
+  .ex-row.done{opacity:0.45;}
+  .rm{width:14px;flex:none;background:none;border:none;color:var(--dim);font-size:12px;padding:0;}
+  .tag{width:26px;flex:none;font-size:12px;color:var(--dim);text-transform:uppercase;}
+  .name{flex:1 1 auto;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .scheme{width:44px;flex:none;font-size:12px;color:var(--dim);text-align:center;}
+  .prev{width:34px;flex:none;font-size:12px;color:var(--dim);text-align:center;}
+  .doneMark{width:20px;flex:none;font-size:13px;text-align:center;}
+
+  .setpanel{padding:4px 0 10px 26px;}
+  .set-colhead{
+    display:flex;align-items:center;font-size:10px;color:var(--dim);
+    margin-bottom:4px;
+  }
+  .sc-num{width:26px;flex:none;}
+  .sc-reps{width:56px;flex:none;text-align:center;}
+  .sc-weight{width:56px;flex:none;text-align:center;}
+  .sc-done{width:36px;flex:none;text-align:center;}
+
+  .setrow{display:flex;align-items:center;font-size:14px;margin-bottom:6px;}
+  .setrow.done{opacity:0.45;}
+  .set-num{width:26px;flex:none;color:var(--dim);}
+  .set-reps,.set-weight{
+    width:56px;flex:none;text-align:center;
+    background:none;border:none;color:inherit;font-family:inherit;font-size:14px;
+    border-bottom:1px solid var(--line);
+  }
+  .set-done{
+    width:36px;flex:none;text-align:center;
+    background:none;border:none;color:var(--dim);font-size:14px;
+  }
+  .setrow.done .set-done{color:var(--text);}
+  .setctl{background:none;border:none;color:var(--dim);font-size:13px;padding:2px 6px 0 26px;}
+
+  .addrow{
+    display:flex;align-items:center;
+    padding:8px 0;border-bottom:1px solid var(--line);
+    font-size:13px;color:var(--dim);
+  }
+  .addrow input{
+    background:none;border:none;
+    color:var(--text);font-family:inherit;font-size:13px;
+    padding:0;
+  }
+  .addrow input.tag{width:26px;flex:none;border-bottom:1px solid var(--line);}
+  .addrow input.n{flex:1 1 auto;min-width:0;border-bottom:1px solid var(--line);margin-right:6px;}
+  .addrow input.s{width:44px;flex:none;text-align:center;border-bottom:1px solid var(--line);margin-right:6px;}
+  .addbtn{background:none;border:1px solid var(--line);color:var(--text);
+    font-family:inherit;font-size:13px;padding:4px 8px;flex:none;}
+
+  .footer{
+    position:fixed;bottom:0;left:0;right:0;
+    max-width:520px;margin:0 auto;
+    display:flex;border-top:1px solid var(--line);background:#000;
+  }
+  .footer button{flex:1;background:none;border:none;color:var(--text);
+    font-family:inherit;font-size:13px;padding:12px 4px;}
+  .footer .save{color:#fff;font-weight:bold;}
+
+  .type-section{margin-bottom:20px;}
+  .type-title{font-size:15px;font-weight:bold;border-bottom:1px solid var(--line);padding-bottom:4px;margin-bottom:6px;}
+  .sess{margin-bottom:10px;}
+  .sess-date{font-size:12px;color:var(--dim);margin-bottom:2px;}
+  .sess-ex{font-size:13px;margin-bottom:2px;}
+  .sess-ex .en{color:var(--text);}
+  .sess-ex .sd{color:var(--dim);}
+
+  .hist-colhead{
+    display:flex;align-items:center;font-size:10px;color:var(--dim);
+    padding-bottom:4px;border-bottom:1px solid var(--line);margin-bottom:4px;
+  }
+  .hist-ch-name{flex:1 1 auto;}
+  .hist-ch-set{width:50px;flex:none;text-align:center;}
+  .hist-row{display:flex;align-items:center;font-size:13px;padding:5px 0;border-bottom:1px solid var(--line);}
+  .hist-row .tag{width:24px;flex:none;color:var(--dim);font-size:11px;}
+  .hist-row .name{flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .hist-set{width:50px;flex:none;text-align:center;color:var(--dim);}
+  .empty{color:var(--dim);font-size:13px;}
+
+  .stat-row{
+    display:flex;align-items:center;
+    padding:8px 0;border-bottom:1px solid var(--line);
+    font-size:14px;
+  }
+  .stat-row .tag{width:26px;flex:none;font-size:12px;color:var(--dim);}
+  .stat-row .name{flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .stat-row .type{width:44px;flex:none;font-size:11px;color:var(--dim);text-align:right;}
+  .stats-row{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:8px 0;border-bottom:1px solid var(--line);font-size:14px;
+  }
+  .stats-row .left{display:flex;align-items:center;overflow:hidden;flex:1 1 auto;margin-right:8px;}
+  .stats-row .left .tag{width:24px;flex:none;color:var(--dim);font-size:12px;}
+  .stats-row .left .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .hist-date-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);}
+  .hist-date-row .name{flex:none;font-size:14px;}
+  .hist-groups{display:flex;gap:8px;flex:none;}
+  .hist-groups span{color:var(--line);font-size:10px;}
+  .hist-groups span.active{color:var(--text);}
+  .stat-back{background:none;border:none;color:var(--dim);font-size:13px;padding:8px 0;margin-bottom:6px;}
+  .stat-title{font-size:15px;margin-bottom:10px;}
+  .chart-empty{color:var(--dim);font-size:13px;padding:20px 0;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+const STORE_KEY = 'workoutAppData_v5';
+
+function schemeSetCount(scheme){
+  const m = /^(\d+)/.exec(scheme || '');
+  const n = m ? parseInt(m[1],10) : 3;
+  return Math.max(1, Math.min(n, 8));
+}
+
+function schemeReps(scheme){
+  const m = /x\s*(\d+)/i.exec(scheme || '');
+  return m ? parseInt(m[1],10) : 10;
+}
+
+function withSetCount(scheme, count){
+  return count + 'x' + schemeReps(scheme);
+}
+
+function defaultCatalog(){
+  return {
+    push: [
+      {id:'push-bb-bench-press', tag:'BB', name:'Bench Press'},
+      {id:'push-bb-bench-press-decline', tag:'BB', name:'Bench Press (Decline)'},
+      {id:'push-bb-bench-press-incline', tag:'BB', name:'Bench Press (Incline)'},
+      {id:'push-mc-chest-fly', tag:'MC', name:'Chest Fly'},
+      {id:'push-db-chest-fly', tag:'DB', name:'Chest Fly'},
+      {id:'push-db-chest-fly-incline', tag:'DB', name:'Chest Fly (Incline)'},
+      {id:'push-db-chest-press', tag:'DB', name:'Chest Press'},
+      {id:'push-mc-chest-press', tag:'MC', name:'Chest Press'},
+      {id:'push-db-chest-press-incline', tag:'DB', name:'Chest Press (Incline)'},
+      {id:'push-mc-dip', tag:'MC', name:'Dip'},
+      {id:'push-bw-dip', tag:'BW', name:'Dip'},
+      {id:'push-mc-lateral-raise', tag:'MC', name:'Lateral Raise'},
+      {id:'push-mc-overhead-press', tag:'MC', name:'Overhead Press'},
+      {id:'push-mc-pectoral-fly', tag:'MC', name:'Pectoral Fly'},
+      {id:'push-bw-press-up', tag:'BW', name:'Press Up'},
+      {id:'push-mc-tricep-extension', tag:'MC', name:'Tricep Extension'}
+    ],
+    pull: [
+      {id:'pull-db-bicep-curl', tag:'DB', name:'Bicep Curl'},
+      {id:'pull-cb-face-pull', tag:'CB', name:'Face Pull'},
+      {id:'pull-db-hammer-curl', tag:'DB', name:'Hammer Curl'},
+      {id:'pull-ez-preacher-curl', tag:'EZ', name:'Preacher Curl'},
+      {id:'pull-cb-pull-down-narrow', tag:'CB', name:'Pull Down (Narrow)'},
+      {id:'pull-cb-pull-down-wide', tag:'CB', name:'Pull Down (Wide)'},
+      {id:'pull-bw-pull-up-neutral', tag:'BW', name:'Pull Up (Neutral)'},
+      {id:'pull-bw-pull-up-wide', tag:'BW', name:'Pull Up (Wide)'},
+      {id:'pull-bb-reverse-curl', tag:'BB', name:'Reverse Curl'},
+      {id:'pull-bb-row-bent-over', tag:'BB', name:'Row (Bent Over)'},
+      {id:'pull-mc-row-seated', tag:'MC', name:'Row (Seated)'},
+      {id:'pull-bb-row-upright', tag:'BB', name:'Row (Upright)'},
+      {id:'pull-db-wrist-rotation', tag:'DB', name:'Wrist Rotation'}
+    ],
+    legs: [
+      {id:'legs-pl-back-extension', tag:'PL', name:'Back Extension'},
+      {id:'legs-mc-calf-raise', tag:'MC', name:'Calf Raise'},
+      {id:'legs-mc-hamstring-curl', tag:'MC', name:'Hamstring Curl'},
+      {id:'legs-mc-hip-abduction', tag:'MC', name:'Hip Abduction'},
+      {id:'legs-mc-hip-thrust', tag:'MC', name:'Hip Thrust'},
+      {id:'legs-mc-leg-extension', tag:'MC', name:'Leg Extension'},
+      {id:'legs-mc-leg-press', tag:'MC', name:'Leg Press'},
+      {id:'legs-bb-russian-dead-lift', tag:'BB', name:'Russian Dead Lift'},
+      {id:'legs-bb-squat', tag:'BB', name:'Squat'}
+    ],
+    core: [
+      {id:'core-bw-leg-raise', tag:'BW', name:'Leg Raise'},
+      {id:'core-db-russian-twist', tag:'DB', name:'Russian Twist'},
+      {id:'core-kb-side-bend', tag:'KB', name:'Side Bend'},
+      {id:'core-db-sit-up', tag:'DB', name:'Sit Up'}
+    ]
+  };
+}
+
+function defaultData(){
+  return {
+    catalog: defaultCatalog(),
+    exercises: {push: [], pull: [], legs: [], core: []},
+    maxWeights: {},
+    history: {push:[], pull:[], legs:[], core:[]},
+    drafts: {}
+  };
+}
+
+function load(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(!raw) return defaultData();
+    const d = JSON.parse(raw);
+    if(!d.exercises || !d.history) return defaultData();
+    if(!d.catalog) d.catalog = defaultCatalog();
+    if(!d.drafts) d.drafts = {};
+    ['push','pull','legs','core'].forEach(t => {
+      if(!d.history[t]) d.history[t] = [];
+      if(!d.exercises[t]) d.exercises[t] = [];
+      if(!d.catalog[t]) d.catalog[t] = [];
+    });
+    return d;
+  }catch(e){ return defaultData(); }
+}
+function save(){ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+
+let state = load();
+let view = 'workout';
+let currentType = 'push';
+let editMode = false;
+let expandedId = null;
+let statsSelected = null; // {type, id}
+let statsType = null;
+let historyType = null;
+let historySelected = null; // {type, index} into state.history[type]
+let chartSelectedIdx = null;
+
+function emptySets(n, scheme, maxWeight){
+  const reps = schemeReps(scheme);
+  return Array.from({length:n}, () => ({
+    reps: reps ? String(reps) : '',
+    weight: maxWeight ? String(maxWeight) : '',
+    done:false
+  }));
+}
+
+function draftFor(type){
+  if(!state.drafts[type]) state.drafts[type] = {};
+  const d = state.drafts[type];
+  state.exercises[type].forEach(ex => {
+    const n = schemeSetCount(ex.scheme);
+    const maxW = state.maxWeights[ex.id];
+    if(!d[ex.id]) d[ex.id] = {sets: emptySets(n, ex.scheme, maxW)};
+    while(d[ex.id].sets.length < n){
+      d[ex.id].sets.push({
+        reps: schemeReps(ex.scheme) ? String(schemeReps(ex.scheme)) : '',
+        weight: maxW ? String(maxW) : '',
+        done:false
+      });
+    }
+  });
+  return d;
+}
+
+function allSetsDone(entry){
+  return entry.sets.length > 0 && entry.sets.every(s => s.done);
+}
+
+function modeReps(sets){
+  const counts = {};
+  sets.forEach(s => {
+    const r = parseInt(s.reps, 10);
+    if(!isNaN(r)) counts[r] = (counts[r] || 0) + 1;
+  });
+  let best = null, bestCount = 0;
+  Object.keys(counts).forEach(k => {
+    const n = parseInt(k, 10);
+    if(counts[k] > bestCount || (counts[k] === bestCount && (best === null || n > best))){
+      best = n; bestCount = counts[k];
+    }
+  });
+  return best;
+}
+
+function prevMax(id){ return state.maxWeights[id] || null; }
+
+function buildChart(points, selectedIdx, onSelect){
+  const NS = 'http://www.w3.org/2000/svg';
+  const W = 300, H = 180, padL = 34, padR = 10, padT = 10, padB = 24;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+
+  const xs = points.map(p => p.date.getTime());
+  const ys = points.map(p => p.weight);
+  let xmin = Math.min(...xs), xmax = Math.max(...xs);
+  let ymin = Math.min(...ys), ymax = Math.max(...ys);
+  if(xmin === xmax){ xmin -= 1; xmax += 1; }
+  if(ymin === ymax){ ymin -= 1; ymax += 1; }
+  const ypad = (ymax - ymin) * 0.15;
+  ymin -= ypad; ymax += ypad;
+
+  const sx = t => padL + ((t - xmin) / (xmax - xmin)) * plotW;
+  const sy = w => padT + plotH - ((w - ymin) / (ymax - ymin)) * plotH;
+  const fmtDate = d => d.toLocaleDateString(undefined,{month:'short',day:'numeric'});
+
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('width', '100%');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.style.background = '#000';
+
+  function el(tag, attrs){
+    const e = document.createElementNS(NS, tag);
+    Object.keys(attrs).forEach(k => e.setAttribute(k, attrs[k]));
+    return e;
+  }
+
+  svg.appendChild(el('line', {x1:padL, y1:padT, x2:padL, y2:padT+plotH, stroke:'#333'}));
+  svg.appendChild(el('line', {x1:padL, y1:padT+plotH, x2:padL+plotW, y2:padT+plotH, stroke:'#333'}));
+
+  const yMaxLabel = el('text', {x:2, y:sy(ymax)+4, fill:'#888', 'font-size':10, 'font-family':'monospace'});
+  yMaxLabel.textContent = Math.round(ymax);
+  svg.appendChild(yMaxLabel);
+  const yMinLabel = el('text', {x:2, y:sy(ymin)+4, fill:'#888', 'font-size':10, 'font-family':'monospace'});
+  yMinLabel.textContent = Math.round(ymin);
+  svg.appendChild(yMinLabel);
+
+  const pathD = points.map((p,i) => (i===0?'M':'L') + sx(p.date.getTime()).toFixed(1) + ',' + sy(p.weight).toFixed(1)).join(' ');
+  svg.appendChild(el('path', {d:pathD, fill:'none', stroke:'#eee', 'stroke-width':1.5}));
+
+  const xStartLabel = el('text', {x:padL, y:H-6, fill:'#888', 'font-size':10, 'font-family':'monospace'});
+  xStartLabel.textContent = fmtDate(points[0].date);
+  svg.appendChild(xStartLabel);
+  const xEndLabel = el('text', {x:padL+plotW, y:H-6, fill:'#888', 'font-size':10, 'font-family':'monospace', 'text-anchor':'end'});
+  xEndLabel.textContent = fmtDate(points[points.length-1].date);
+  svg.appendChild(xEndLabel);
+
+  if(selectedIdx !== null && points[selectedIdx]){
+    const p = points[selectedIdx];
+    const px = sx(p.date.getTime()), py = sy(p.weight);
+
+    svg.appendChild(el('line', {x1:padL, y1:py, x2:px, y2:py, stroke:'#666', 'stroke-dasharray':'2,2'}));
+    svg.appendChild(el('line', {x1:px, y1:py, x2:px, y2:padT+plotH, stroke:'#666', 'stroke-dasharray':'2,2'}));
+
+    const wLabel = el('text', {x:2, y:py-4, fill:'#fff', 'font-size':11, 'font-family':'monospace', 'font-weight':'bold'});
+    wLabel.textContent = p.weight;
+    svg.appendChild(wLabel);
+
+    const dLabelX = Math.min(Math.max(px, padL+2), padL+plotW-40);
+    const dLabel = el('text', {x:dLabelX, y:H-6, fill:'#fff', 'font-size':10, 'font-family':'monospace', 'font-weight':'bold'});
+    dLabel.textContent = fmtDate(p.date);
+    svg.appendChild(dLabel);
+  }
+
+  points.forEach((p, i) => {
+    const isSel = i === selectedIdx;
+    const dot = el('circle', {
+      cx: sx(p.date.getTime()).toFixed(1),
+      cy: sy(p.weight).toFixed(1),
+      r: isSel ? 5 : 3,
+      fill: isSel ? '#fff' : '#eee'
+    });
+    dot.style.cursor = 'pointer';
+    dot.addEventListener('click', () => onSelect(i));
+    svg.appendChild(dot);
+
+    const hit = el('circle', {
+      cx: sx(p.date.getTime()).toFixed(1),
+      cy: sy(p.weight).toFixed(1),
+      r: 10,
+      fill: 'transparent'
+    });
+    hit.style.cursor = 'pointer';
+    hit.addEventListener('click', () => onSelect(i));
+    svg.appendChild(hit);
+  });
+
+  const wrap = document.createElement('div');
+  wrap.appendChild(svg);
+  return wrap;
+}
+
+function seedTestData(){
+  const now = Date.now();
+  ['push','pull','legs','core'].forEach(type => {
+    state.catalog[type].forEach(c => {
+      if(!state.exercises[type].some(e => e.id === c.id)){
+        state.exercises[type].push({id: c.id, tag: c.tag, name: c.name, scheme: '3x10'});
+      }
+    });
+
+    const startWeights = {};
+    state.exercises[type].forEach(ex => {
+      startWeights[ex.id] = 20 + Math.round(Math.random()*30);
+    });
+    for(let session = 7; session >= 0; session--){
+      const date = new Date(now - session * 6 * 24 * 60 * 60 * 1000);
+      const entries = [];
+      state.exercises[type].forEach(ex => {
+        const n = schemeSetCount(ex.scheme);
+        const reps = schemeReps(ex.scheme);
+        const progressed = startWeights[ex.id] + (7 - session) * (2 + Math.random()*2);
+        const sets = [];
+        for(let i=0;i<n;i++){
+          const wobble = Math.round((Math.random()-0.5) * 4);
+          sets.push({
+            reps: String(Math.max(1, reps - (Math.random() < 0.2 ? 1 : 0))),
+            weight: String(Math.max(5, Math.round(progressed + wobble)))
+          });
+        }
+        entries.push({exerciseId: ex.id, tag: ex.tag, name: ex.name, scheme: ex.scheme, sets});
+        sets.forEach(s => {
+          const w = parseFloat(s.weight);
+          if(!isNaN(w)){
+            const prev = state.maxWeights[ex.id] || 0;
+            if(w > prev) state.maxWeights[ex.id] = w;
+          }
+        });
+      });
+      state.history[type].unshift({date: date.toISOString(), type, entries});
+    }
+    state.history[type].sort((a,b) => new Date(b.date) - new Date(a.date));
+  });
+  save();
+}
+
+function wipeAllData(){
+  state = defaultData();
+  save();
+}
+
+function exportData(){
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const dstr = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = 'workout-data-' + dstr + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function normalizeState(d){
+  if(!d.catalog) d.catalog = defaultCatalog();
+  if(!d.drafts) d.drafts = {};
+  if(!d.maxWeights) d.maxWeights = {};
+  if(!d.history) d.history = {};
+  if(!d.exercises) d.exercises = {};
+  ['push','pull','legs','core'].forEach(t => {
+    if(!d.history[t]) d.history[t] = [];
+    if(!d.exercises[t]) d.exercises[t] = [];
+    if(!d.catalog[t]) d.catalog[t] = [];
+  });
+  return d;
+}
+
+function importData(file){
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const parsed = JSON.parse(reader.result);
+      if(!parsed.exercises || !parsed.history){
+        alert('That file doesn\'t look like a valid backup.');
+        return;
+      }
+      if(!confirm('Replace all current data with this file?')) return;
+      state = normalizeState(parsed);
+      save();
+      render();
+    }catch(e){
+      alert('Could not read that file.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+const GH_CONFIG_KEY = 'workoutGithubConfig';
+
+function loadGhConfig(){
+  try{
+    const raw = localStorage.getItem(GH_CONFIG_KEY);
+    return raw ? JSON.parse(raw) : {owner:'', repo:'', path:'workout-data.json', token:''};
+  }catch(e){
+    return {owner:'', repo:'', path:'workout-data.json', token:''};
+  }
+}
+function saveGhConfig(cfg){
+  localStorage.setItem(GH_CONFIG_KEY, JSON.stringify(cfg));
+}
+
+function b64EncodeUnicode(str){
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+    (match, p1) => String.fromCharCode(parseInt(p1, 16))));
+}
+function b64DecodeUnicode(str){
+  return decodeURIComponent(atob(str).split('').map(c =>
+    '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+}
+
+function showToast(msg){
+  let toast = document.getElementById('toastMsg');
+  if(!toast){
+    toast = document.createElement('div');
+    toast.id = 'toastMsg';
+    toast.style.cssText = 'position:fixed;bottom:56px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:8px 14px;border-radius:4px;font-size:12px;z-index:50;max-width:90%;text-align:center;transition:opacity 0.3s;';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { toast.style.opacity = '0'; }, 2500);
+}
+
+async function ghPush(cfg, statusEl){
+  if(!cfg.owner || !cfg.repo || !cfg.path || !cfg.token){
+    statusEl.textContent = 'fill in owner, repo, path and token first';
+    return;
+  }
+  statusEl.textContent = 'pushing...';
+  const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${encodeURIComponent(cfg.path)}`;
+  const headers = {
+    'Authorization': 'Bearer ' + cfg.token,
+    'Accept': 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28'
+  };
+  try{
+    let sha = null;
+    const getRes = await fetch(url, {headers});
+    if(getRes.status === 200){
+      const j = await getRes.json();
+      sha = j.sha;
+    } else if(getRes.status !== 404){
+      statusEl.textContent = 'error reading repo (' + getRes.status + ')';
+      return;
+    }
+    const body = {
+      message: 'workout data update ' + new Date().toISOString(),
+      content: b64EncodeUnicode(JSON.stringify(state, null, 2))
+    };
+    if(sha) body.sha = sha;
+    const putRes = await fetch(url, {method:'PUT', headers, body: JSON.stringify(body)});
+    if(putRes.ok){
+      statusEl.textContent = 'pushed ' + new Date().toLocaleTimeString();
+    } else {
+      const err = await putRes.json().catch(() => ({}));
+      statusEl.textContent = 'push failed (' + putRes.status + ') ' + (err.message || '');
+    }
+  }catch(e){
+    statusEl.textContent = 'network error: ' + e.message;
+  }
+}
+
+async function ghPull(cfg, statusEl){
+  if(!cfg.owner || !cfg.repo || !cfg.path || !cfg.token){
+    statusEl.textContent = 'fill in owner, repo, path and token first';
+    return;
+  }
+  statusEl.textContent = 'pulling...';
+  const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${encodeURIComponent(cfg.path)}`;
+  const headers = {
+    'Authorization': 'Bearer ' + cfg.token,
+    'Accept': 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28'
+  };
+  try{
+    const res = await fetch(url, {headers});
+    if(res.status === 404){
+      statusEl.textContent = 'no file found at that path yet';
+      return;
+    }
+    if(!res.ok){
+      statusEl.textContent = 'pull failed (' + res.status + ')';
+      return;
+    }
+    const j = await res.json();
+    const parsed = JSON.parse(b64DecodeUnicode(j.content.replace(/\n/g,'')));
+    if(!parsed.exercises || !parsed.history){
+      statusEl.textContent = 'file did not look like valid backup data';
+      return;
+    }
+    if(!confirm('Replace all current local data with the GitHub copy?')) {
+      statusEl.textContent = 'cancelled';
+      return;
+    }
+    state = normalizeState(parsed);
+    save();
+    statusEl.textContent = 'pulled ' + new Date().toLocaleTimeString();
+    render();
+  }catch(e){
+    statusEl.textContent = 'network error: ' + e.message;
+  }
+}
+
+function render(){
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+
+  const tabs = document.createElement('div');
+  tabs.className = 'tabs';
+  const left = document.createElement('div');
+  ['push','pull','legs','core'].forEach(t => {
+    const b = document.createElement('button');
+    const isActive = (view==='workout' && currentType===t) || (view==='stats' && statsType===t) || (view==='history' && historyType===t);
+    b.className = 'tab' + (isActive ? ' active' : '');
+    b.textContent = t.toUpperCase();
+    b.onclick = () => {
+      currentType = t;
+      if(view === 'stats'){
+        statsType = t; statsSelected = null; chartSelectedIdx = null;
+      } else if(view === 'history'){
+        historyType = t; historySelected = null;
+      } else {
+        view = 'workout'; expandedId = null;
+      }
+      render();
+    };
+    left.appendChild(b);
+  });
+  const right = document.createElement('div');
+  const editBtn = document.createElement('button');
+  editBtn.className = 'tab' + (editMode ? ' active' : '');
+  editBtn.textContent = 'EDIT';
+  editBtn.onclick = () => { editMode = !editMode; render(); };
+  const recordBtn = document.createElement('button');
+  recordBtn.className = 'tab' + (view==='workout' ? ' active' : '');
+  recordBtn.textContent = 'RECORD';
+  recordBtn.onclick = () => { view='workout'; expandedId=null; render(); };
+  const statsBtn = document.createElement('button');
+  statsBtn.className = 'tab' + (view==='stats' ? ' active' : '');
+  statsBtn.textContent = 'STATS';
+  statsBtn.onclick = () => {
+    if(view === 'stats' && statsType !== null){
+      statsType = null; statsSelected = null; chartSelectedIdx = null;
+    } else {
+      view = 'stats'; statsType = currentType; statsSelected = null; chartSelectedIdx = null;
+    }
+    render();
+  };
+  const histBtn = document.createElement('button');
+  histBtn.className = 'tab' + (view==='history' ? ' active' : '');
+  histBtn.textContent = 'HISTORY';
+  histBtn.onclick = () => {
+    if(view === 'history' && historyType !== null){
+      historyType = null; historySelected = null;
+    } else {
+      view = 'history'; historyType = currentType; historySelected = null;
+    }
+    render();
+  };
+  right.appendChild(editBtn);
+  right.appendChild(recordBtn);
+  right.appendChild(statsBtn);
+  right.appendChild(histBtn);
+  tabs.appendChild(left);
+  tabs.appendChild(right);
+  app.appendChild(tabs);
+
+  if(editMode){
+    const devRow = document.createElement('div');
+    devRow.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;';
+    const exportBtn = document.createElement('button');
+    exportBtn.className = 'addbtn';
+    exportBtn.textContent = 'export to file';
+    exportBtn.onclick = () => exportData();
+    const importBtn = document.createElement('button');
+    importBtn.className = 'addbtn';
+    importBtn.textContent = 'import from file';
+    const importInput = document.createElement('input');
+    importInput.type = 'file';
+    importInput.accept = 'application/json';
+    importInput.style.display = 'none';
+    importInput.onchange = () => {
+      if(importInput.files && importInput.files[0]) importData(importInput.files[0]);
+      importInput.value = '';
+    };
+    importBtn.onclick = () => importInput.click();
+    devRow.appendChild(exportBtn);
+    devRow.appendChild(importBtn);
+    devRow.appendChild(importInput);
+    app.appendChild(devRow);
+
+    const devRow2 = document.createElement('div');
+    devRow2.style.cssText = 'display:flex;gap:8px;margin-bottom:12px;';
+    const seedBtn = document.createElement('button');
+    seedBtn.className = 'addbtn';
+    seedBtn.textContent = 'seed test data';
+    seedBtn.onclick = () => { seedTestData(); render(); };
+    const wipeBtn = document.createElement('button');
+    wipeBtn.className = 'addbtn';
+    wipeBtn.textContent = 'wipe all data';
+    wipeBtn.onclick = () => { if(confirm('Erase everything and reset to defaults?')){ wipeAllData(); render(); } };
+    devRow2.appendChild(seedBtn);
+    devRow2.appendChild(wipeBtn);
+    app.appendChild(devRow2);
+
+    const ghPanel = document.createElement('div');
+    ghPanel.style.cssText = 'border-top:1px solid var(--line);padding-top:10px;margin-bottom:14px;';
+    const ghLabel = document.createElement('div');
+    ghLabel.style.cssText = 'font-size:11px;color:var(--dim);margin-bottom:6px;';
+    ghLabel.textContent = 'github sync';
+    ghPanel.appendChild(ghLabel);
+
+    const cfg = loadGhConfig();
+    const mkInput = (val, ph, type) => {
+      const inp = document.createElement('input');
+      inp.value = val || '';
+      inp.placeholder = ph;
+      inp.type = type || 'text';
+      inp.style.cssText = 'display:block;width:100%;background:none;border:none;border-bottom:1px solid var(--line);color:var(--text);font-family:inherit;font-size:13px;padding:4px 0;margin-bottom:6px;';
+      return inp;
+    };
+    const ownerInp = mkInput(cfg.owner, 'owner (github username)');
+    const repoInp = mkInput(cfg.repo, 'repo name');
+    const pathInp = mkInput(cfg.path, 'file path e.g. workout-data.json');
+    const tokenInp = mkInput(cfg.token, 'fine-grained access token', 'password');
+    ghPanel.appendChild(ownerInp);
+    ghPanel.appendChild(repoInp);
+    ghPanel.appendChild(pathInp);
+    ghPanel.appendChild(tokenInp);
+
+    const statusEl = document.createElement('div');
+    statusEl.style.cssText = 'font-size:12px;color:var(--dim);margin:4px 0 8px;';
+    statusEl.textContent = ' ';
+
+    const ghBtnRow = document.createElement('div');
+    ghBtnRow.style.cssText = 'display:flex;gap:8px;';
+    const pushBtn = document.createElement('button');
+    pushBtn.className = 'addbtn';
+    pushBtn.textContent = 'push to github';
+    const pullBtn = document.createElement('button');
+    pullBtn.className = 'addbtn';
+    pullBtn.textContent = 'pull from github';
+
+    const currentCfg = () => ({
+      owner: ownerInp.value.trim(),
+      repo: repoInp.value.trim(),
+      path: pathInp.value.trim(),
+      token: tokenInp.value.trim()
+    });
+
+    pushBtn.onclick = () => { const c = currentCfg(); saveGhConfig(c); ghPush(c, statusEl); };
+    pullBtn.onclick = () => { const c = currentCfg(); saveGhConfig(c); ghPull(c, statusEl); };
+
+    ghBtnRow.appendChild(pushBtn);
+    ghBtnRow.appendChild(pullBtn);
+    ghPanel.appendChild(statusEl);
+    ghPanel.appendChild(ghBtnRow);
+    app.appendChild(ghPanel);
+  }
+
+  if(view === 'stats'){
+    if(!statsSelected){
+      const list = (statsType === null)
+        ? ['push','pull','legs','core'].flatMap(type => state.exercises[type].map(ex => ({ex, type})))
+        : state.exercises[statsType].map(ex => ({ex, type: statsType}));
+
+      list.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'stats-row';
+        let groupsHtml = '<div class="hist-groups">';
+        ['push','pull','legs','core'].forEach(t => {
+          groupsHtml += `<span class="${t === item.type ? 'active' : ''}">${t.toUpperCase()}</span>`;
+        });
+        groupsHtml += '</div>';
+        row.innerHTML = `<span class="left"><span class="tag">${item.ex.tag}</span><span class="name">${item.ex.name}</span></span>${groupsHtml}`;
+        row.onclick = () => { statsSelected = {type: item.type, id: item.ex.id}; chartSelectedIdx = null; render(); };
+        app.appendChild(row);
+      });
+      return;
+    }
+
+    const back = document.createElement('button');
+    back.className = 'stat-back';
+    back.textContent = '\u2190 back';
+    back.onclick = () => { statsSelected = null; chartSelectedIdx = null; render(); };
+    app.appendChild(back);
+
+    const ex = state.exercises[statsSelected.type].find(e => e.id === statsSelected.id);
+    const title = document.createElement('div');
+    title.className = 'stat-title';
+    title.textContent = ex ? (ex.tag + ' ' + ex.name) : '';
+    app.appendChild(title);
+
+    const points = [];
+    state.history[statsSelected.type].forEach(rec => {
+      const entry = rec.entries.find(e => e.exerciseId === statsSelected.id);
+      if(!entry) return;
+      let max = null;
+      entry.sets.forEach(s => {
+        const w = parseFloat(s.weight);
+        if(!isNaN(w) && (max === null || w > max)) max = w;
+      });
+      if(max !== null) points.push({date: new Date(rec.date), weight: max});
+    });
+    points.sort((a,b) => a.date - b.date);
+
+    if(points.length === 0){
+      const e = document.createElement('div');
+      e.className = 'chart-empty';
+      e.textContent = 'no logged sets yet for this exercise';
+      app.appendChild(e);
+    } else {
+      app.appendChild(buildChart(points, chartSelectedIdx, (i) => { chartSelectedIdx = i; render(); }));
+    }
+    return;
+  }
+
+  if(view === 'history'){
+    if(!historySelected){
+      let rows;
+      if(historyType === null){
+        const byDate = {};
+        ['push','pull','legs','core'].forEach(type => {
+          state.history[type].forEach((rec, index) => {
+            const d = new Date(rec.date);
+            const key = d.toDateString();
+            if(!byDate[key]) byDate[key] = {date: d, items: []};
+            byDate[key].items.push({type, index});
+          });
+        });
+        rows = Object.values(byDate);
+      } else {
+        rows = state.history[historyType].map((rec, index) => ({
+          date: new Date(rec.date),
+          items: [{type: historyType, index}]
+        }));
+      }
+      rows.sort((a,b) => b.date - a.date);
+
+      if(rows.length === 0){
+        const e = document.createElement('div');
+        e.className = 'empty';
+        e.textContent = 'no sessions saved yet';
+        app.appendChild(e);
+      } else {
+        rows.forEach(row => {
+          const el = document.createElement('div');
+          const dstr = row.date.toLocaleDateString(undefined,{year:'2-digit',month:'2-digit',day:'2-digit'});
+          const done = new Set(row.items.map(i => i.type));
+          el.className = 'hist-date-row';
+          let groupsHtml = '<div class="hist-groups">';
+          ['push','pull','legs','core'].forEach(t => {
+            groupsHtml += `<span class="${done.has(t) ? 'active' : ''}">${t.toUpperCase()}</span>`;
+          });
+          groupsHtml += '</div>';
+          el.innerHTML = `<span class="name">${dstr}</span>${groupsHtml}`;
+          el.onclick = () => { historySelected = row; render(); };
+          app.appendChild(el);
+        });
+      }
+      return;
+    }
+
+    const back = document.createElement('button');
+    back.className = 'stat-back';
+    back.textContent = '\u2190 back';
+    back.onclick = () => { historySelected = null; render(); };
+    app.appendChild(back);
+
+    const recs = historySelected.items
+      .map(i => ({type: i.type, rec: state.history[i.type][i.index]}))
+      .filter(r => r.rec);
+
+    if(recs.length === 0){
+      historySelected = null;
+      render();
+      return;
+    }
+
+    const dstr = new Date(recs[0].rec.date).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});
+    const title = document.createElement('div');
+    title.className = 'stat-title';
+    title.textContent = recs.map(r => r.type.toUpperCase()).join(' + ') + ' \u2013 ' + dstr;
+    app.appendChild(title);
+
+    recs.forEach(({type, rec}) => {
+      if(recs.length > 1){
+        const groupLabel = document.createElement('div');
+        groupLabel.style.cssText = 'font-size:12px;color:var(--dim);margin:10px 0 4px;text-transform:uppercase;';
+        groupLabel.textContent = type;
+        app.appendChild(groupLabel);
+      }
+
+      const entries = rec.entries.filter(e => e.sets.some(st => st.reps !== '' || st.weight !== ''));
+      let maxSets = 1;
+      entries.forEach(e => { if(e.sets.length > maxSets) maxSets = e.sets.length; });
+
+      const colhead = document.createElement('div');
+      colhead.className = 'hist-colhead';
+      let chHtml = '<span class="hist-ch-name">exercise</span>';
+      for(let i=1;i<=maxSets;i++) chHtml += `<span class="hist-ch-set">${i}</span>`;
+      colhead.innerHTML = chHtml;
+      app.appendChild(colhead);
+
+      entries.forEach(e => {
+        const row = document.createElement('div');
+        row.className = 'hist-row';
+        let html = `<span class="tag">${e.tag}</span><span class="name">${e.name}</span>`;
+        e.sets.forEach(s => {
+          const reps = s.reps || '\u2013';
+          const wt = s.weight || '\u2013';
+          html += `<span class="hist-set">${reps}/${wt}</span>`;
+        });
+        row.innerHTML = html;
+        app.appendChild(row);
+      });
+    });
+    return;
+  }
+
+  const type = currentType;
+  const draft = draftFor(type);
+
+  const colhead = document.createElement('div');
+  colhead.className = 'colhead';
+  colhead.innerHTML = '<span class="ch-tag"></span><span class="ch-name">exercise</span><span class="ch-scheme">sets</span><span class="ch-prev">max</span><span class="ch-done">✓</span>';
+  app.appendChild(colhead);
+
+  state.exercises[type].forEach(ex => {
+    const d = draft[ex.id];
+    const isExpanded = expandedId === ex.id;
+    const done = allSetsDone(d);
+
+    const block = document.createElement('div');
+    block.className = 'ex-block';
+
+    const row = document.createElement('div');
+    row.className = 'ex-row' + (done ? ' done' : '');
+
+    if(editMode){
+      const rm = document.createElement('button');
+      rm.className = 'rm';
+      rm.textContent = '×';
+      rm.onclick = (ev) => {
+        ev.stopPropagation();
+        state.exercises[type] = state.exercises[type].filter(e => e.id !== ex.id);
+        delete draft[ex.id];
+        save(); render();
+      };
+      row.appendChild(rm);
+    }
+
+    const tag = document.createElement('span');
+    tag.className = 'tag';
+    tag.textContent = ex.tag;
+    row.appendChild(tag);
+
+    const name = document.createElement('span');
+    name.className = 'name';
+    name.textContent = ex.name;
+    row.appendChild(name);
+
+    const scheme = document.createElement('span');
+    scheme.className = 'scheme';
+    scheme.textContent = ex.scheme;
+    row.appendChild(scheme);
+
+    const prev = document.createElement('span');
+    prev.className = 'prev';
+    prev.textContent = prevMax(ex.id) || '—';
+    row.appendChild(prev);
+
+    const doneMark = document.createElement('span');
+    doneMark.className = 'doneMark';
+    doneMark.textContent = done ? '✓' : '';
+    row.appendChild(doneMark);
+
+    row.onclick = () => {
+      expandedId = isExpanded ? null : ex.id;
+      render();
+    };
+    block.appendChild(row);
+
+    if(isExpanded){
+      const panel = document.createElement('div');
+      panel.className = 'setpanel';
+
+      const sch = document.createElement('div');
+      sch.className = 'set-colhead';
+      sch.innerHTML = '<span class="sc-num">set</span><span class="sc-reps">reps</span><span class="sc-weight">weight</span><span class="sc-done">done</span>';
+      panel.appendChild(sch);
+
+      d.sets.forEach((s, si) => {
+        const sr = document.createElement('div');
+        sr.className = 'setrow' + (s.done ? ' done' : '');
+
+        const num = document.createElement('span');
+        num.className = 'set-num';
+        num.textContent = si + 1;
+        sr.appendChild(num);
+
+        const reps = document.createElement('input');
+        reps.className = 'set-reps';
+        reps.type = 'number'; reps.inputMode = 'numeric';
+        reps.value = s.reps;
+        reps.onclick = (ev) => ev.stopPropagation();
+        reps.oninput = (e) => { s.reps = e.target.value; save(); };
+        sr.appendChild(reps);
+
+        const weight = document.createElement('input');
+        weight.className = 'set-weight';
+        weight.type = 'number'; weight.inputMode = 'decimal';
+        weight.value = s.weight;
+        weight.onclick = (ev) => ev.stopPropagation();
+        weight.oninput = (e) => { s.weight = e.target.value; save(); };
+        sr.appendChild(weight);
+
+        const doneBtn = document.createElement('button');
+        doneBtn.className = 'set-done';
+        doneBtn.textContent = s.done ? '✓' : '_';
+        doneBtn.onclick = (ev) => {
+          ev.stopPropagation();
+          s.done = !s.done;
+          save();
+          if(allSetsDone(d)){
+            const mode = modeReps(d.sets);
+            if(mode !== null) ex.scheme = d.sets.length + 'x' + mode;
+            save();
+            expandedId = null;
+          }
+          render();
+        };
+        sr.appendChild(doneBtn);
+
+        panel.appendChild(sr);
+      });
+
+      const ctl = document.createElement('div');
+      const addSet = document.createElement('button');
+      addSet.className = 'setctl';
+      addSet.textContent = '+ set';
+      addSet.onclick = (ev) => {
+        ev.stopPropagation();
+        const maxW = state.maxWeights[ex.id];
+        d.sets.push({
+          reps: schemeReps(ex.scheme) ? String(schemeReps(ex.scheme)) : '',
+          weight: maxW ? String(maxW) : '',
+          done:false
+        });
+        ex.scheme = withSetCount(ex.scheme, d.sets.length);
+        save(); render();
+      };
+      ctl.appendChild(addSet);
+      if(d.sets.length > 1){
+        const rmSet = document.createElement('button');
+        rmSet.className = 'setctl';
+        rmSet.textContent = '− set';
+        rmSet.onclick = (ev) => {
+          ev.stopPropagation();
+          d.sets.pop();
+          ex.scheme = withSetCount(ex.scheme, d.sets.length);
+          save(); render();
+        };
+        ctl.appendChild(rmSet);
+      }
+      panel.appendChild(ctl);
+
+      block.appendChild(panel);
+    }
+
+    app.appendChild(block);
+  });
+
+  const remaining = state.catalog[type].filter(c => !state.exercises[type].some(e => e.id === c.id));
+  if(remaining.length > 0){
+    const pickLabel = document.createElement('div');
+    pickLabel.style.cssText = 'font-size:11px;color:var(--dim);margin:10px 0 4px;';
+    pickLabel.textContent = 'add from list';
+    app.appendChild(pickLabel);
+
+    remaining.forEach(c => {
+      const row = document.createElement('div');
+      row.className = 'stat-row';
+      row.innerHTML = `<span class="tag">${c.tag}</span><span class="name">${c.name}</span>`;
+      row.onclick = () => {
+        const scheme = '3x10';
+        state.exercises[type].push({id: c.id, tag: c.tag, name: c.name, scheme});
+        draft[c.id] = {sets: emptySets(schemeSetCount(scheme), scheme, state.maxWeights[c.id])};
+        save(); render();
+      };
+      app.appendChild(row);
+    });
+  }
+
+  if(editMode){
+    const addrow = document.createElement('div');
+    addrow.className = 'addrow';
+    addrow.innerHTML = `
+      <input class="tag" id="nTag" placeholder="tag" maxlength="3">
+      <input class="n" id="nName" placeholder="new custom exercise">
+      <input class="s" id="nScheme" placeholder="3x10">
+      <button class="addbtn" id="addBtn">+ add to catalog</button>
+    `;
+    app.appendChild(addrow);
+    document.getElementById('addBtn').onclick = () => {
+      const tag = document.getElementById('nTag').value.trim().toUpperCase() || 'EX';
+      const name = document.getElementById('nName').value.trim();
+      const scheme = document.getElementById('nScheme').value.trim() || '3x10';
+      if(!name) return;
+      const id = type + '-' + name.toLowerCase().replace(/[^a-z0-9]+/g,'-') + '-' + Date.now();
+      state.catalog[type].push({id, tag, name});
+      state.exercises[type].push({id, tag, name, scheme});
+      draft[id] = {sets: emptySets(schemeSetCount(scheme), scheme, null)};
+      save(); render();
+    };
+  }
+
+  const footer = document.createElement('div');
+  footer.className = 'footer';
+  const clearBtn = document.createElement('button');
+  clearBtn.textContent = 'clear';
+  clearBtn.onclick = () => {
+    if(!confirm('Clear today\'s entries for ' + type + '?')) return;
+    state.exercises[type].forEach(ex => {
+      draft[ex.id] = {sets: emptySets(schemeSetCount(ex.scheme), ex.scheme, state.maxWeights[ex.id])};
+    });
+    expandedId = null;
+    save(); render();
+  };
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'save';
+  saveBtn.textContent = 'save day';
+  saveBtn.onclick = () => {
+    const entries = state.exercises[type].map(ex => {
+      const d = draft[ex.id];
+      d.sets.forEach(s => {
+        const w = parseFloat(s.weight);
+        if(!isNaN(w)){
+          const prev = state.maxWeights[ex.id] || 0;
+          if(w > prev) state.maxWeights[ex.id] = w;
+        }
+      });
+      return {exerciseId:ex.id, tag:ex.tag, name:ex.name, scheme:ex.scheme, sets: d.sets.map(s=>({reps:s.reps,weight:s.weight}))};
+    });
+    state.history[type].unshift({date:new Date().toISOString(), type, entries});
+    state.exercises[type].forEach(ex => {
+      draft[ex.id] = {sets: emptySets(schemeSetCount(ex.scheme), ex.scheme, state.maxWeights[ex.id])};
+    });
+    expandedId = null;
+    save(); render();
+
+    const ghCfg = loadGhConfig();
+    if(ghCfg.owner && ghCfg.repo && ghCfg.path && ghCfg.token){
+      const toastProxy = { set textContent(v){ showToast(v); } };
+      ghPush(ghCfg, toastProxy);
+    }
+  };
+  footer.appendChild(clearBtn);
+  footer.appendChild(saveBtn);
+  app.appendChild(footer);
+}
+
+render();
+
+const fsBtn = document.createElement('button');
+fsBtn.textContent = '\u26F6';
+fsBtn.style.cssText = 'position:fixed;bottom:8px;left:8px;z-index:60;background:#111;border:1px solid #333;color:#eee;font-size:14px;width:32px;height:32px;border-radius:4px;';
+fsBtn.onclick = () => {
+  if(!document.fullscreenElement){
+    document.documentElement.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen();
+  }
+};
+document.body.appendChild(fsBtn);
+</script>
+</body>
+</html>
