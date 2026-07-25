@@ -29,14 +29,13 @@
     padding:10px 0 10px;
     margin:-10px -10px 4px;
     padding-left:10px;padding-right:10px;
-    border-bottom:1px solid var(--line);
   }
   .tab{color:var(--dim);font-size:15px;background:none;border:none;padding:6px 4px;}
   .tab.active{color:var(--text);border-bottom:2px solid var(--text);}
 
   .colhead{
     display:flex;align-items:center;font-size:10px;color:var(--dim);
-    padding:0 0 4px;border-bottom:1px solid var(--line);margin-bottom:2px;
+    padding:0 0 4px;margin-bottom:2px;
   }
   .ch-tag{width:26px;flex:none;}
   .ch-name{flex:1 1 auto;}
@@ -44,18 +43,26 @@
   .ch-prev{width:34px;flex:none;text-align:center;}
   .ch-done{width:20px;flex:none;text-align:center;}
 
-  .ex-block{border-bottom:1px solid var(--line);}
+  .ex-block{}
   .ex-row{
     display:flex;align-items:center;
-    padding:8px 0;
+    height:36px;
   }
   .ex-row.done{opacity:0.45;}
-  .rm{width:14px;flex:none;background:none;border:none;color:var(--dim);font-size:12px;padding:0;}
+  .editctl{
+    display:flex;align-items:center;flex:none;
+    width:110px;overflow:hidden;
+  }
+  .editctl.hidden-ctl{visibility:hidden;}
+  .rm{width:20px;flex:none;background:none;border:none;color:#fff;font-size:20px;padding:0;margin-left:6px;line-height:1;}
   .tag{width:26px;flex:none;font-size:12px;color:var(--dim);text-transform:uppercase;}
-  .name{flex:1 1 auto;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .name{flex:1 1 auto;min-width:0;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .scheme{width:44px;flex:none;font-size:12px;color:var(--dim);text-align:center;}
   .prev{width:34px;flex:none;font-size:12px;color:var(--dim);text-align:center;}
   .doneMark{width:20px;flex:none;font-size:13px;text-align:center;}
+  .reorder{display:flex;align-items:flex-start;gap:12px;flex:none;margin-left:10px;}
+  .reorder button{background:none;border:none;padding:6px;display:flex;align-items:flex-start;justify-content:center;color:var(--text);}
+  .reorder button:disabled{opacity:0.2;}
 
   .setpanel{padding:4px 0 10px 26px;}
   .set-colhead{
@@ -63,17 +70,16 @@
     margin-bottom:4px;
   }
   .sc-num{width:26px;flex:none;}
-  .sc-reps{width:56px;flex:none;text-align:center;}
-  .sc-weight{width:56px;flex:none;text-align:center;}
+  .sc-reps{width:56px;flex:none;text-align:right;}
+  .sc-weight{width:56px;flex:none;text-align:right;}
   .sc-done{width:36px;flex:none;text-align:center;}
 
   .setrow{display:flex;align-items:center;font-size:14px;margin-bottom:6px;}
   .setrow.done{opacity:0.45;}
   .set-num{width:26px;flex:none;color:var(--dim);}
   .set-reps,.set-weight{
-    width:56px;flex:none;text-align:center;
+    width:56px;flex:none;text-align:right;
     background:none;border:none;color:inherit;font-family:inherit;font-size:14px;
-    border-bottom:1px solid var(--line);
   }
   .set-done{
     width:36px;flex:none;text-align:center;
@@ -84,7 +90,7 @@
 
   .addrow{
     display:flex;align-items:center;
-    padding:8px 0;border-bottom:1px solid var(--line);
+    padding:8px 0;
     font-size:13px;color:var(--dim);
   }
   .addrow input{
@@ -101,14 +107,16 @@
   .footer{
     position:fixed;bottom:0;left:0;right:0;
     max-width:520px;margin:0 auto;
-    display:flex;border-top:1px solid var(--line);background:#000;
+    display:flex;background:#000;height:52px;
   }
   .footer button{flex:1;background:none;border:none;color:var(--text);
-    font-family:inherit;font-size:13px;padding:12px 4px;}
-  .footer .save{color:#fff;font-weight:bold;}
+    font-family:inherit;display:flex;align-items:center;justify-content:center;height:100%;}
+  .footer button.footerBtn{font-size:20px;border-bottom:2px solid transparent;}
+  .footer button.footerBtn.active{border-bottom-color:#fff;color:#fff;}
+  .footer button.footerBtn.enabled{color:#fff;}
 
   .type-section{margin-bottom:20px;}
-  .type-title{font-size:15px;font-weight:bold;border-bottom:1px solid var(--line);padding-bottom:4px;margin-bottom:6px;}
+  .type-title{font-size:15px;font-weight:bold;padding-bottom:4px;margin-bottom:6px;}
   .sess{margin-bottom:10px;}
   .sess-date{font-size:12px;color:var(--dim);margin-bottom:2px;}
   .sess-ex{font-size:13px;margin-bottom:2px;}
@@ -117,11 +125,11 @@
 
   .hist-colhead{
     display:flex;align-items:center;font-size:10px;color:var(--dim);
-    padding-bottom:4px;border-bottom:1px solid var(--line);margin-bottom:4px;
+    padding-bottom:4px;margin-bottom:4px;
   }
   .hist-ch-name{flex:1 1 auto;}
   .hist-ch-set{width:50px;flex:none;text-align:center;}
-  .hist-row{display:flex;align-items:center;font-size:13px;padding:5px 0;border-bottom:1px solid var(--line);}
+  .hist-row{display:flex;align-items:center;font-size:13px;padding:5px 0;}
   .hist-row .tag{width:24px;flex:none;color:var(--dim);font-size:11px;}
   .hist-row .name{flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .hist-set{width:50px;flex:none;text-align:center;color:var(--dim);}
@@ -129,7 +137,7 @@
 
   .stat-row{
     display:flex;align-items:center;
-    padding:8px 0;border-bottom:1px solid var(--line);
+    padding:8px 0;
     font-size:14px;
   }
   .stat-row .tag{width:26px;flex:none;font-size:12px;color:var(--dim);}
@@ -137,12 +145,12 @@
   .stat-row .type{width:44px;flex:none;font-size:11px;color:var(--dim);text-align:right;}
   .stats-row{
     display:flex;align-items:center;justify-content:space-between;
-    padding:8px 0;border-bottom:1px solid var(--line);font-size:14px;
+    padding:8px 0;font-size:14px;
   }
   .stats-row .left{display:flex;align-items:center;overflow:hidden;flex:1 1 auto;margin-right:8px;}
   .stats-row .left .tag{width:24px;flex:none;color:var(--dim);font-size:12px;}
   .stats-row .left .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .hist-date-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);}
+  .hist-date-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;}
   .hist-date-row .name{flex:none;font-size:14px;}
   .hist-groups{display:flex;gap:8px;flex:none;}
   .hist-groups span{color:var(--line);font-size:10px;}
@@ -157,6 +165,184 @@
 
 <script>
 const STORE_KEY = 'workoutAppData_v5';
+
+function measureTextWidth(text, font){
+  if(!measureTextWidth._canvas) measureTextWidth._canvas = document.createElement('canvas');
+  const ctx = measureTextWidth._canvas.getContext('2d');
+  ctx.font = font;
+  return ctx.measureText(text).width;
+}
+
+function buildChevron(direction){
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('width', '16');
+  svg.setAttribute('height', '11');
+  svg.setAttribute('viewBox', '0 0 16 11');
+  svg.style.display = 'block';
+  const poly = document.createElementNS(NS, 'polyline');
+  poly.setAttribute('points', direction === 'up' ? '1,10 8,1 15,10' : '1,1 8,10 15,1');
+  poly.setAttribute('fill', 'none');
+  poly.setAttribute('stroke', 'currentColor');
+  poly.setAttribute('stroke-width', '2');
+  poly.setAttribute('stroke-linecap', 'round');
+  poly.setAttribute('stroke-linejoin', 'round');
+  svg.appendChild(poly);
+  return svg;
+}
+
+function buildLeftChevron(){
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('width', '12');
+  svg.setAttribute('height', '18');
+  svg.setAttribute('viewBox', '0 0 12 18');
+  svg.style.display = 'block';
+  const poly = document.createElementNS(NS, 'polyline');
+  poly.setAttribute('points', '10,1 2,9 10,17');
+  poly.setAttribute('fill', 'none');
+  poly.setAttribute('stroke', 'currentColor');
+  poly.setAttribute('stroke-width', '2.2');
+  poly.setAttribute('stroke-linecap', 'round');
+  poly.setAttribute('stroke-linejoin', 'round');
+  svg.appendChild(poly);
+  return svg;
+}
+
+function buildRightChevron(){
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('width', '12');
+  svg.setAttribute('height', '18');
+  svg.setAttribute('viewBox', '0 0 12 18');
+  svg.style.display = 'block';
+  const poly = document.createElementNS(NS, 'polyline');
+  poly.setAttribute('points', '2,1 10,9 2,17');
+  poly.setAttribute('fill', 'none');
+  poly.setAttribute('stroke', 'currentColor');
+  poly.setAttribute('stroke-width', '2.2');
+  poly.setAttribute('stroke-linecap', 'round');
+  poly.setAttribute('stroke-linejoin', 'round');
+  svg.appendChild(poly);
+  return svg;
+}
+
+function buildCalendarIcon(){
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('width', '20');
+  svg.setAttribute('height', '20');
+  svg.setAttribute('viewBox', '0 0 20 20');
+  svg.style.display = 'block';
+  const rect = document.createElementNS(NS, 'rect');
+  rect.setAttribute('x', '2'); rect.setAttribute('y', '4');
+  rect.setAttribute('width', '16'); rect.setAttribute('height', '14');
+  rect.setAttribute('rx', '2');
+  rect.setAttribute('fill', 'none');
+  rect.setAttribute('stroke', 'currentColor');
+  rect.setAttribute('stroke-width', '2');
+  svg.appendChild(rect);
+  const line1 = document.createElementNS(NS, 'line');
+  line1.setAttribute('x1', '2'); line1.setAttribute('y1', '8');
+  line1.setAttribute('x2', '18'); line1.setAttribute('y2', '8');
+  line1.setAttribute('stroke', 'currentColor');
+  line1.setAttribute('stroke-width', '2');
+  svg.appendChild(line1);
+  [6, 14].forEach(x => {
+    const tick = document.createElementNS(NS, 'line');
+    tick.setAttribute('x1', x); tick.setAttribute('y1', '2');
+    tick.setAttribute('x2', x); tick.setAttribute('y2', '6');
+    tick.setAttribute('stroke', 'currentColor');
+    tick.setAttribute('stroke-width', '2');
+    tick.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(tick);
+  });
+  return svg;
+}
+
+function buildGraphIcon(){
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('width', '20');
+  svg.setAttribute('height', '20');
+  svg.setAttribute('viewBox', '0 0 20 20');
+  svg.style.display = 'block';
+  const poly = document.createElementNS(NS, 'polyline');
+  poly.setAttribute('points', '2,16 7,10 11,13 18,3');
+  poly.setAttribute('fill', 'none');
+  poly.setAttribute('stroke', 'currentColor');
+  poly.setAttribute('stroke-width', '2.2');
+  poly.setAttribute('stroke-linecap', 'round');
+  poly.setAttribute('stroke-linejoin', 'round');
+  svg.appendChild(poly);
+  return svg;
+}
+
+function buildTableIcon(){
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('width', '20');
+  svg.setAttribute('height', '20');
+  svg.setAttribute('viewBox', '0 0 20 20');
+  svg.style.display = 'block';
+  const rect = document.createElementNS(NS, 'rect');
+  rect.setAttribute('x', '2'); rect.setAttribute('y', '2');
+  rect.setAttribute('width', '16'); rect.setAttribute('height', '16');
+  rect.setAttribute('rx', '2');
+  rect.setAttribute('fill', 'none');
+  rect.setAttribute('stroke', 'currentColor');
+  rect.setAttribute('stroke-width', '2');
+  svg.appendChild(rect);
+  const hline = document.createElementNS(NS, 'line');
+  hline.setAttribute('x1', '2'); hline.setAttribute('y1', '10');
+  hline.setAttribute('x2', '18'); hline.setAttribute('y2', '10');
+  hline.setAttribute('stroke', 'currentColor');
+  hline.setAttribute('stroke-width', '2');
+  svg.appendChild(hline);
+  const vline = document.createElementNS(NS, 'line');
+  vline.setAttribute('x1', '10'); vline.setAttribute('y1', '2');
+  vline.setAttribute('x2', '10'); vline.setAttribute('y2', '18');
+  vline.setAttribute('stroke', 'currentColor');
+  vline.setAttribute('stroke-width', '2');
+  svg.appendChild(vline);
+  return svg;
+}
+
+function buildCheckIcon(){
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('width', '22');
+  svg.setAttribute('height', '22');
+  svg.setAttribute('viewBox', '0 0 22 22');
+  svg.style.display = 'block';
+  const poly = document.createElementNS(NS, 'polyline');
+  poly.setAttribute('points', '3,11 9,17 19,4');
+  poly.setAttribute('fill', 'none');
+  poly.setAttribute('stroke', 'currentColor');
+  poly.setAttribute('stroke-width', '2.4');
+  poly.setAttribute('stroke-linecap', 'round');
+  poly.setAttribute('stroke-linejoin', 'round');
+  svg.appendChild(poly);
+  return svg;
+}
+
+function buildUndoIcon(){
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('width', '22');
+  svg.setAttribute('height', '22');
+  svg.setAttribute('viewBox', '0 0 22 22');
+  svg.style.display = 'block';
+  const circle = document.createElementNS(NS, 'circle');
+  circle.setAttribute('cx', '11');
+  circle.setAttribute('cy', '11');
+  circle.setAttribute('r', '8');
+  circle.setAttribute('fill', 'none');
+  circle.setAttribute('stroke', 'currentColor');
+  circle.setAttribute('stroke-width', '2.4');
+  svg.appendChild(circle);
+  return svg;
+}
 
 function schemeSetCount(scheme){
   const m = /^(\d+)/.exec(scheme || '');
@@ -260,11 +446,15 @@ let state = load();
 let view = 'workout';
 let currentType = 'push';
 let editMode = false;
+let adminPanelOpen = false;
 let expandedId = null;
 let statsSelected = null; // {type, id}
 let statsType = null;
+let statsShowTable = false;
 let historyType = null;
-let historySelected = null; // {type, index} into state.history[type]
+let historySelected = null; // {date, items}
+let historyCalendarOpen = false;
+let historyCalendarMonth = null;
 let chartSelectedIdx = null;
 
 function emptySets(n, scheme, maxWeight){
@@ -411,6 +601,170 @@ function buildChart(points, selectedIdx, onSelect){
   return wrap;
 }
 
+function buildBottomBar(opts){
+  const isArr = Array.isArray(opts);
+  const middleButtons = isArr ? opts : (opts.middleButtons || []);
+  const leftButton = isArr ? null : opts.leftButton;
+  const rightButton = isArr ? null : opts.rightButton;
+
+  const bar = document.createElement('div');
+  bar.className = 'footer';
+
+  function makeBtn(cfg){
+    const b = document.createElement('button');
+    let cls = 'footerBtn';
+    if(cfg.active) cls += ' active';
+    else if(cfg.enabled) cls += ' enabled';
+    b.className = cls;
+    if(cfg.svg) b.appendChild(cfg.svg);
+    else b.textContent = cfg.icon;
+    if(cfg.disabled) b.style.opacity = '0.3';
+    b.onclick = cfg.onclick || (() => {});
+    return b;
+  }
+
+  if(leftButton){
+    bar.appendChild(makeBtn(leftButton));
+  }
+
+  middleButtons.forEach(btn => {
+    bar.appendChild(makeBtn(btn));
+  });
+
+  if(rightButton){
+    bar.appendChild(makeBtn(rightButton));
+  }
+
+  document.getElementById('app').appendChild(bar);
+
+  if(!leftButton){
+    dockFsBtn(bar);
+  }
+  if(!rightButton){
+    dockEditBtn(bar);
+  }
+}
+
+function getHistoryRows(historyTypeFilter){
+  let rows;
+  if(historyTypeFilter === null){
+    const byDate = {};
+    ['push','pull','legs','core'].forEach(type => {
+      state.history[type].forEach((rec, index) => {
+        const d = new Date(rec.date);
+        const key = d.toDateString();
+        if(!byDate[key]) byDate[key] = {date: d, items: []};
+        byDate[key].items.push({type, index});
+      });
+    });
+    rows = Object.values(byDate);
+  } else {
+    rows = state.history[historyTypeFilter].map((rec, index) => ({
+      date: new Date(rec.date),
+      items: [{type: historyTypeFilter, index}]
+    }));
+  }
+  rows.sort((a,b) => b.date - a.date);
+  return rows;
+}
+
+function buildCalendarGrid(monthDate, historyTypeFilter, onPickDay){
+  const year = monthDate.getFullYear();
+  const month = monthDate.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const startWeekday = firstDay.getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const daysWithData = {};
+  const types = historyTypeFilter === null ? ['push','pull','legs','core'] : [historyTypeFilter];
+  types.forEach(t => {
+    state.history[t].forEach((rec, index) => {
+      const d = new Date(rec.date);
+      if(d.getFullYear() === year && d.getMonth() === month){
+        const day = d.getDate();
+        if(!daysWithData[day]) daysWithData[day] = [];
+        daysWithData[day].push({type: t, index});
+      }
+    });
+  });
+
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'display:flex;flex-direction:column;height:100%;';
+
+  const monthLabel = document.createElement('div');
+  monthLabel.style.cssText = 'font-size:20px;margin-bottom:20px;text-align:center;font-weight:600;';
+  monthLabel.textContent = monthDate.toLocaleDateString(undefined,{month:'long',year:'numeric'});
+  wrap.appendChild(monthLabel);
+
+  const grid = document.createElement('div');
+  grid.style.cssText = 'display:grid;grid-template-columns:repeat(7,1fr);gap:8px;flex:1;';
+  ['S','M','T','W','T','F','S'].forEach(d => {
+    const h = document.createElement('div');
+    h.style.cssText = 'text-align:center;font-size:13px;color:var(--dim);padding-bottom:10px;';
+    h.textContent = d;
+    grid.appendChild(h);
+  });
+  for(let i=0;i<startWeekday;i++){
+    grid.appendChild(document.createElement('div'));
+  }
+  for(let day=1; day<=daysInMonth; day++){
+    const cell = document.createElement('div');
+    const hasData = !!daysWithData[day];
+    cell.style.cssText = 'display:flex;align-items:center;justify-content:center;' +
+      'aspect-ratio:1;font-size:19px;border-radius:10px;' +
+      (hasData ? 'background:#222;color:#fff;font-weight:600;' : 'color:var(--dim);');
+    cell.textContent = day;
+    if(hasData){
+      cell.onclick = () => onPickDay({date: new Date(year, month, day), items: daysWithData[day]});
+    }
+    grid.appendChild(cell);
+  }
+  wrap.appendChild(grid);
+  return wrap;
+}
+
+function buildExerciseHistoryTable(type, id){
+  const sessions = state.history[type]
+    .map(rec => ({date: new Date(rec.date), entry: rec.entries.find(e => e.exerciseId === id)}))
+    .filter(s => s.entry && s.entry.sets.some(st => st.reps !== '' || st.weight !== ''));
+  sessions.sort((a,b) => b.date - a.date);
+
+  const wrap2 = document.createElement('div');
+  if(sessions.length === 0){
+    const e = document.createElement('div');
+    e.className = 'chart-empty';
+    e.textContent = 'no logged sets yet for this exercise';
+    wrap2.appendChild(e);
+    return wrap2;
+  }
+
+  let maxSets = 1;
+  sessions.forEach(s => { if(s.entry.sets.length > maxSets) maxSets = s.entry.sets.length; });
+
+  const colhead = document.createElement('div');
+  colhead.className = 'hist-colhead';
+  let ch = '<span class="hist-ch-name">date</span>';
+  for(let i=1;i<=maxSets;i++) ch += `<span class="hist-ch-set">${i}</span>`;
+  colhead.innerHTML = ch;
+  colhead.querySelector('.hist-ch-name').style.cssText = 'flex:none;width:72px;';
+  wrap2.appendChild(colhead);
+
+  sessions.forEach(s => {
+    const row = document.createElement('div');
+    row.className = 'hist-row';
+    const dstr = s.date.toLocaleDateString(undefined,{year:'2-digit',month:'2-digit',day:'2-digit'});
+    let html = `<span class="name" style="flex:none;width:72px;">${dstr}</span>`;
+    s.entry.sets.forEach(st => {
+      const reps = st.reps || '\u2013';
+      const wt = st.weight || '\u2013';
+      html += `<span class="hist-set">${reps}/${wt}</span>`;
+    });
+    row.innerHTML = html;
+    wrap2.appendChild(row);
+  });
+  return wrap2;
+}
+
 function seedTestData(){
   const now = Date.now();
   ['push','pull','legs','core'].forEach(type => {
@@ -493,15 +847,18 @@ function importData(file){
     try{
       const parsed = JSON.parse(reader.result);
       if(!parsed.exercises || !parsed.history){
-        alert('That file doesn\'t look like a valid backup.');
+        showAlert('That file doesn\'t look like a valid backup.');
         return;
       }
-      if(!confirm('Replace all current data with this file?')) return;
-      state = normalizeState(parsed);
-      save();
-      render();
+      showModal('Replace all current data with this file?', {
+        onConfirm: () => {
+          state = normalizeState(parsed);
+          save();
+          render();
+        }
+      });
     }catch(e){
-      alert('Could not read that file.');
+      showAlert('Could not read that file.');
     }
   };
   reader.readAsText(file);
@@ -528,6 +885,49 @@ function b64EncodeUnicode(str){
 function b64DecodeUnicode(str){
   return decodeURIComponent(atob(str).split('').map(c =>
     '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+}
+
+function showModal(message, opts){
+  opts = opts || {};
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;';
+
+  const box = document.createElement('div');
+  box.style.cssText = 'background:#111;border:1px solid #333;border-radius:8px;padding:20px;max-width:300px;width:100%;text-align:center;font-family:inherit;';
+
+  const msg = document.createElement('div');
+  msg.style.cssText = 'color:#eee;font-size:14px;margin-bottom:18px;line-height:1.4;';
+  msg.textContent = message;
+  box.appendChild(msg);
+
+  const btnRow = document.createElement('div');
+  btnRow.style.cssText = 'display:flex;gap:10px;';
+
+  function close(){
+    if(overlay.parentNode) document.body.removeChild(overlay);
+  }
+
+  if(opts.showCancel !== false){
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = opts.cancelLabel || 'Cancel';
+    cancelBtn.style.cssText = 'flex:1;background:none;border:1px solid #444;color:#999;padding:10px;border-radius:6px;font-family:inherit;font-size:14px;';
+    cancelBtn.onclick = () => { close(); if(opts.onCancel) opts.onCancel(); };
+    btnRow.appendChild(cancelBtn);
+  }
+
+  const okBtn = document.createElement('button');
+  okBtn.textContent = opts.confirmLabel || 'OK';
+  okBtn.style.cssText = 'flex:1;background:#eee;border:none;color:#111;padding:10px;border-radius:6px;font-family:inherit;font-size:14px;font-weight:600;';
+  okBtn.onclick = () => { close(); if(opts.onConfirm) opts.onConfirm(); };
+  btnRow.appendChild(okBtn);
+
+  box.appendChild(btnRow);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+
+function showAlert(message){
+  showModal(message, {showCancel: false, confirmLabel: 'OK'});
 }
 
 function showToast(msg){
@@ -611,14 +1011,15 @@ async function ghPull(cfg, statusEl){
       statusEl.textContent = 'file did not look like valid backup data';
       return;
     }
-    if(!confirm('Replace all current local data with the GitHub copy?')) {
-      statusEl.textContent = 'cancelled';
-      return;
-    }
-    state = normalizeState(parsed);
-    save();
-    statusEl.textContent = 'pulled ' + new Date().toLocaleTimeString();
-    render();
+    showModal('Replace all current local data with the GitHub copy?', {
+      onConfirm: () => {
+        state = normalizeState(parsed);
+        save();
+        statusEl.textContent = 'pulled ' + new Date().toLocaleTimeString();
+        render();
+      },
+      onCancel: () => { statusEl.textContent = 'cancelled'; }
+    });
   }catch(e){
     statusEl.textContent = 'network error: ' + e.message;
   }
@@ -650,10 +1051,6 @@ function render(){
     left.appendChild(b);
   });
   const right = document.createElement('div');
-  const editBtn = document.createElement('button');
-  editBtn.className = 'tab' + (editMode ? ' active' : '');
-  editBtn.textContent = 'EDIT';
-  editBtn.onclick = () => { editMode = !editMode; render(); };
   const recordBtn = document.createElement('button');
   recordBtn.className = 'tab' + (view==='workout' ? ' active' : '');
   recordBtn.textContent = 'RECORD';
@@ -680,7 +1077,6 @@ function render(){
     }
     render();
   };
-  right.appendChild(editBtn);
   right.appendChild(recordBtn);
   right.appendChild(statsBtn);
   right.appendChild(histBtn);
@@ -688,7 +1084,14 @@ function render(){
   tabs.appendChild(right);
   app.appendChild(tabs);
 
-  if(editMode){
+  if(adminPanelOpen){
+    const closeRow = document.createElement('button');
+    closeRow.className = 'addbtn';
+    closeRow.textContent = 'close admin panel';
+    closeRow.style.marginBottom = '8px';
+    closeRow.onclick = () => { adminPanelOpen = false; render(); };
+    app.appendChild(closeRow);
+
     const devRow = document.createElement('div');
     devRow.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;';
     const exportBtn = document.createElement('button');
@@ -721,13 +1124,17 @@ function render(){
     const wipeBtn = document.createElement('button');
     wipeBtn.className = 'addbtn';
     wipeBtn.textContent = 'wipe all data';
-    wipeBtn.onclick = () => { if(confirm('Erase everything and reset to defaults?')){ wipeAllData(); render(); } };
+    wipeBtn.onclick = () => {
+      showModal('Erase everything and reset to defaults?', {
+        onConfirm: () => { wipeAllData(); render(); }
+      });
+    };
     devRow2.appendChild(seedBtn);
     devRow2.appendChild(wipeBtn);
     app.appendChild(devRow2);
 
     const ghPanel = document.createElement('div');
-    ghPanel.style.cssText = 'border-top:1px solid var(--line);padding-top:10px;margin-bottom:14px;';
+    ghPanel.style.cssText = 'padding-top:10px;margin-bottom:14px;';
     const ghLabel = document.createElement('div');
     ghLabel.style.cssText = 'font-size:11px;color:var(--dim);margin-bottom:6px;';
     ghLabel.textContent = 'github sync';
@@ -779,6 +1186,9 @@ function render(){
     ghPanel.appendChild(statusEl);
     ghPanel.appendChild(ghBtnRow);
     app.appendChild(ghPanel);
+
+    buildBottomBar([]);
+    return;
   }
 
   if(view === 'stats'){
@@ -799,14 +1209,15 @@ function render(){
         row.onclick = () => { statsSelected = {type: item.type, id: item.ex.id}; chartSelectedIdx = null; render(); };
         app.appendChild(row);
       });
+      buildBottomBar({
+        middleButtons: [
+          {svg: buildGraphIcon(), active: !statsShowTable, onclick: () => { statsShowTable = false; render(); }},
+          {svg: buildTableIcon(), active: statsShowTable, onclick: () => { statsShowTable = true; render(); }}
+        ],
+        rightButton: {svg: buildLeftChevron(), disabled: true, onclick: () => {}}
+      });
       return;
     }
-
-    const back = document.createElement('button');
-    back.className = 'stat-back';
-    back.textContent = '\u2190 back';
-    back.onclick = () => { statsSelected = null; chartSelectedIdx = null; render(); };
-    app.appendChild(back);
 
     const ex = state.exercises[statsSelected.type].find(e => e.id === statsSelected.id);
     const title = document.createElement('div');
@@ -814,51 +1225,82 @@ function render(){
     title.textContent = ex ? (ex.tag + ' ' + ex.name) : '';
     app.appendChild(title);
 
-    const points = [];
-    state.history[statsSelected.type].forEach(rec => {
-      const entry = rec.entries.find(e => e.exerciseId === statsSelected.id);
-      if(!entry) return;
-      let max = null;
-      entry.sets.forEach(s => {
-        const w = parseFloat(s.weight);
-        if(!isNaN(w) && (max === null || w > max)) max = w;
-      });
-      if(max !== null) points.push({date: new Date(rec.date), weight: max});
-    });
-    points.sort((a,b) => a.date - b.date);
-
-    if(points.length === 0){
-      const e = document.createElement('div');
-      e.className = 'chart-empty';
-      e.textContent = 'no logged sets yet for this exercise';
-      app.appendChild(e);
+    if(statsShowTable){
+      app.appendChild(buildExerciseHistoryTable(statsSelected.type, statsSelected.id));
     } else {
-      app.appendChild(buildChart(points, chartSelectedIdx, (i) => { chartSelectedIdx = i; render(); }));
+      const points = [];
+      state.history[statsSelected.type].forEach(rec => {
+        const entry = rec.entries.find(e => e.exerciseId === statsSelected.id);
+        if(!entry) return;
+        let max = null;
+        entry.sets.forEach(s => {
+          const w = parseFloat(s.weight);
+          if(!isNaN(w) && (max === null || w > max)) max = w;
+        });
+        if(max !== null) points.push({date: new Date(rec.date), weight: max});
+      });
+      points.sort((a,b) => a.date - b.date);
+
+      if(points.length === 0){
+        const e = document.createElement('div');
+        e.className = 'chart-empty';
+        e.textContent = 'no logged sets yet for this exercise';
+        app.appendChild(e);
+      } else {
+        app.appendChild(buildChart(points, chartSelectedIdx, (i) => { chartSelectedIdx = i; render(); }));
+      }
     }
+
+    buildBottomBar({
+      middleButtons: [
+        {svg: buildGraphIcon(), active: !statsShowTable, onclick: () => { statsShowTable = false; render(); }},
+        {svg: buildTableIcon(), active: statsShowTable, onclick: () => { statsShowTable = true; render(); }}
+      ],
+      rightButton: {svg: buildLeftChevron(), enabled: true, onclick: () => { statsSelected = null; chartSelectedIdx = null; render(); }}
+    });
     return;
   }
 
   if(view === 'history'){
-    if(!historySelected){
-      let rows;
-      if(historyType === null){
-        const byDate = {};
-        ['push','pull','legs','core'].forEach(type => {
-          state.history[type].forEach((rec, index) => {
-            const d = new Date(rec.date);
-            const key = d.toDateString();
-            if(!byDate[key]) byDate[key] = {date: d, items: []};
-            byDate[key].items.push({type, index});
-          });
-        });
-        rows = Object.values(byDate);
-      } else {
-        rows = state.history[historyType].map((rec, index) => ({
-          date: new Date(rec.date),
-          items: [{type: historyType, index}]
-        }));
+    if(historyCalendarMonth === null){
+      const now = new Date();
+      historyCalendarMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    }
+
+    const calBtn = {
+      svg: buildCalendarIcon(),
+      active: historyCalendarOpen,
+      onclick: () => {
+        historyCalendarOpen = !historyCalendarOpen;
+        if(historyCalendarOpen) historySelected = null;
+        render();
       }
-      rows.sort((a,b) => b.date - a.date);
+    };
+
+    if(historyCalendarOpen){
+      app.appendChild(buildCalendarGrid(historyCalendarMonth, historyType, (row) => {
+        historySelected = row;
+        historyCalendarOpen = false;
+        render();
+      }));
+      buildBottomBar({
+        leftButton: calBtn,
+        middleButtons: [
+          {svg: buildLeftChevron(), enabled: true, onclick: () => {
+            historyCalendarMonth = new Date(historyCalendarMonth.getFullYear(), historyCalendarMonth.getMonth() - 1, 1);
+            render();
+          }},
+          {svg: buildRightChevron(), enabled: true, onclick: () => {
+            historyCalendarMonth = new Date(historyCalendarMonth.getFullYear(), historyCalendarMonth.getMonth() + 1, 1);
+            render();
+          }}
+        ]
+      });
+      return;
+    }
+
+    if(!historySelected){
+      const rows = getHistoryRows(historyType);
 
       if(rows.length === 0){
         const e = document.createElement('div');
@@ -881,14 +1323,15 @@ function render(){
           app.appendChild(el);
         });
       }
+      buildBottomBar({
+        leftButton: calBtn,
+        middleButtons: [
+          {svg: buildLeftChevron(), disabled: true, onclick: () => {}},
+          {svg: buildRightChevron(), disabled: true, onclick: () => {}}
+        ]
+      });
       return;
     }
-
-    const back = document.createElement('button');
-    back.className = 'stat-back';
-    back.textContent = '\u2190 back';
-    back.onclick = () => { historySelected = null; render(); };
-    app.appendChild(back);
 
     const recs = historySelected.items
       .map(i => ({type: i.type, rec: state.history[i.type][i.index]}))
@@ -918,17 +1361,26 @@ function render(){
       let maxSets = 1;
       entries.forEach(e => { if(e.sets.length > maxSets) maxSets = e.sets.length; });
 
+      const nameFont = '14px -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif';
+      let maxNameW = 0;
+      entries.forEach(e => {
+        const w = measureTextWidth(e.name, nameFont);
+        if(w > maxNameW) maxNameW = w;
+      });
+      maxNameW = Math.ceil(maxNameW) + 6;
+
       const colhead = document.createElement('div');
       colhead.className = 'hist-colhead';
       let chHtml = '<span class="hist-ch-name">exercise</span>';
       for(let i=1;i<=maxSets;i++) chHtml += `<span class="hist-ch-set">${i}</span>`;
       colhead.innerHTML = chHtml;
+      colhead.querySelector('.hist-ch-name').style.cssText = 'flex:none;width:' + (maxNameW + 26) + 'px;';
       app.appendChild(colhead);
 
       entries.forEach(e => {
         const row = document.createElement('div');
         row.className = 'hist-row';
-        let html = `<span class="tag">${e.tag}</span><span class="name">${e.name}</span>`;
+        let html = `<span class="tag">${e.tag}</span><span class="name" style="flex:none;width:${maxNameW}px;">${e.name}</span>`;
         e.sets.forEach(s => {
           const reps = s.reps || '\u2013';
           const wt = s.weight || '\u2013';
@@ -938,18 +1390,44 @@ function render(){
         app.appendChild(row);
       });
     });
+
+    const rows = getHistoryRows(historyType);
+    const curIdx = rows.findIndex(r => r.date.getTime() === historySelected.date.getTime());
+    const canOlder = curIdx !== -1 && curIdx < rows.length - 1;
+    const canNewer = curIdx > 0;
+
+    buildBottomBar({
+      leftButton: calBtn,
+      middleButtons: [
+        {svg: buildLeftChevron(), disabled: !canOlder, onclick: () => {
+          if(canOlder){ historySelected = rows[curIdx + 1]; render(); }
+        }},
+        {svg: buildRightChevron(), disabled: !canNewer, onclick: () => {
+          if(canNewer){ historySelected = rows[curIdx - 1]; render(); }
+        }}
+      ]
+    });
     return;
   }
 
   const type = currentType;
   const draft = draftFor(type);
 
+  const nameFont = '14px -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif';
+  let maxNameWidth = 0;
+  state.exercises['push'].forEach(ex => {
+    const w = measureTextWidth(ex.name, nameFont);
+    if(w > maxNameWidth) maxNameWidth = w;
+  });
+  maxNameWidth = Math.ceil(maxNameWidth) + 6;
+
   const colhead = document.createElement('div');
   colhead.className = 'colhead';
-  colhead.innerHTML = '<span class="ch-tag"></span><span class="ch-name">exercise</span><span class="ch-scheme">sets</span><span class="ch-prev">max</span><span class="ch-done">✓</span>';
+  colhead.innerHTML = '<span class="ch-tag"></span><span class="ch-name">exercise</span><span class="editctl"></span><span class="ch-scheme">sets</span><span class="ch-prev">max</span><span class="ch-done">✓</span>';
+  colhead.querySelector('.ch-name').style.cssText = 'flex:none;width:' + maxNameWidth + 'px;';
   app.appendChild(colhead);
 
-  state.exercises[type].forEach(ex => {
+  state.exercises[type].forEach((ex, idx) => {
     const d = draft[ex.id];
     const isExpanded = expandedId === ex.id;
     const done = allSetsDone(d);
@@ -960,19 +1438,6 @@ function render(){
     const row = document.createElement('div');
     row.className = 'ex-row' + (done ? ' done' : '');
 
-    if(editMode){
-      const rm = document.createElement('button');
-      rm.className = 'rm';
-      rm.textContent = '×';
-      rm.onclick = (ev) => {
-        ev.stopPropagation();
-        state.exercises[type] = state.exercises[type].filter(e => e.id !== ex.id);
-        delete draft[ex.id];
-        save(); render();
-      };
-      row.appendChild(rm);
-    }
-
     const tag = document.createElement('span');
     tag.className = 'tag';
     tag.textContent = ex.tag;
@@ -981,7 +1446,56 @@ function render(){
     const name = document.createElement('span');
     name.className = 'name';
     name.textContent = ex.name;
+    name.style.flex = 'none';
+    name.style.width = maxNameWidth + 'px';
     row.appendChild(name);
+
+    const editCtl = document.createElement('div');
+    editCtl.className = 'editctl' + (editMode ? '' : ' hidden-ctl');
+
+    const rm = document.createElement('button');
+    rm.className = 'rm';
+    rm.textContent = '×';
+    rm.tabIndex = editMode ? 0 : -1;
+    rm.onclick = (ev) => {
+      ev.stopPropagation();
+      if(!editMode) return;
+      state.exercises[type] = state.exercises[type].filter(e => e.id !== ex.id);
+      delete draft[ex.id];
+      save(); render();
+    };
+    editCtl.appendChild(rm);
+
+    const reorder = document.createElement('div');
+    reorder.className = 'reorder';
+    const up = document.createElement('button');
+    up.disabled = idx === 0;
+    up.tabIndex = editMode ? 0 : -1;
+    up.appendChild(buildChevron('up'));
+    up.onclick = (ev) => {
+      ev.stopPropagation();
+      if(!editMode || idx === 0) return;
+      const arr = state.exercises[type];
+      [arr[idx-1], arr[idx]] = [arr[idx], arr[idx-1]];
+      save(); render();
+    };
+    const down = document.createElement('button');
+    down.disabled = idx === state.exercises[type].length - 1;
+    down.tabIndex = editMode ? 0 : -1;
+    down.appendChild(buildChevron('down'));
+    down.onclick = (ev) => {
+      ev.stopPropagation();
+      if(!editMode) return;
+      const arr = state.exercises[type];
+      if(idx === arr.length - 1) return;
+      [arr[idx+1], arr[idx]] = [arr[idx], arr[idx+1]];
+      save(); render();
+    };
+    reorder.appendChild(up);
+    reorder.appendChild(down);
+    editCtl.appendChild(reorder);
+
+    row.appendChild(editCtl);
 
     const scheme = document.createElement('span');
     scheme.className = 'scheme';
@@ -1061,7 +1575,7 @@ function render(){
       const ctl = document.createElement('div');
       const addSet = document.createElement('button');
       addSet.className = 'setctl';
-      addSet.textContent = '+ set';
+      addSet.textContent = '+';
       addSet.onclick = (ev) => {
         ev.stopPropagation();
         const maxW = state.maxWeights[ex.id];
@@ -1077,7 +1591,7 @@ function render(){
       if(d.sets.length > 1){
         const rmSet = document.createElement('button');
         rmSet.className = 'setctl';
-        rmSet.textContent = '− set';
+        rmSet.textContent = '\u2212';
         rmSet.onclick = (ev) => {
           ev.stopPropagation();
           d.sets.pop();
@@ -1141,53 +1655,71 @@ function render(){
   const footer = document.createElement('div');
   footer.className = 'footer';
   const clearBtn = document.createElement('button');
-  clearBtn.textContent = 'clear';
+  clearBtn.className = 'footerBtn';
+  clearBtn.appendChild(buildUndoIcon());
   clearBtn.onclick = () => {
-    if(!confirm('Clear today\'s entries for ' + type + '?')) return;
-    state.exercises[type].forEach(ex => {
-      draft[ex.id] = {sets: emptySets(schemeSetCount(ex.scheme), ex.scheme, state.maxWeights[ex.id])};
+    showModal('Are you sure? This will clear today\'s entries.', {
+      onConfirm: () => {
+        state.exercises[type].forEach(ex => {
+          draft[ex.id] = {sets: emptySets(schemeSetCount(ex.scheme), ex.scheme, state.maxWeights[ex.id])};
+        });
+        expandedId = null;
+        save(); render();
+      }
     });
-    expandedId = null;
-    save(); render();
   };
   const saveBtn = document.createElement('button');
-  saveBtn.className = 'save';
-  saveBtn.textContent = 'save day';
+  saveBtn.className = 'footerBtn';
+  saveBtn.appendChild(buildCheckIcon());
   saveBtn.onclick = () => {
-    const entries = state.exercises[type].map(ex => {
-      const d = draft[ex.id];
-      d.sets.forEach(s => {
-        const w = parseFloat(s.weight);
-        if(!isNaN(w)){
-          const prev = state.maxWeights[ex.id] || 0;
-          if(w > prev) state.maxWeights[ex.id] = w;
-        }
-      });
-      return {exerciseId:ex.id, tag:ex.tag, name:ex.name, scheme:ex.scheme, sets: d.sets.map(s=>({reps:s.reps,weight:s.weight}))};
-    });
-    state.history[type].unshift({date:new Date().toISOString(), type, entries});
-    state.exercises[type].forEach(ex => {
-      draft[ex.id] = {sets: emptySets(schemeSetCount(ex.scheme), ex.scheme, state.maxWeights[ex.id])};
-    });
-    expandedId = null;
-    save(); render();
+    showModal('Are you sure you want to save this workout?', {
+      onConfirm: () => {
+        const entries = state.exercises[type].map(ex => {
+          const d = draft[ex.id];
+          d.sets.forEach(s => {
+            const w = parseFloat(s.weight);
+            if(!isNaN(w)){
+              const prev = state.maxWeights[ex.id] || 0;
+              if(w > prev) state.maxWeights[ex.id] = w;
+            }
+          });
+          return {exerciseId:ex.id, tag:ex.tag, name:ex.name, scheme:ex.scheme, sets: d.sets.map(s=>({reps:s.reps,weight:s.weight}))};
+        });
+        state.history[type].unshift({date:new Date().toISOString(), type, entries});
+        state.exercises[type].forEach(ex => {
+          draft[ex.id] = {sets: emptySets(schemeSetCount(ex.scheme), ex.scheme, state.maxWeights[ex.id])};
+        });
+        expandedId = null;
+        save(); render();
 
-    const ghCfg = loadGhConfig();
-    if(ghCfg.owner && ghCfg.repo && ghCfg.path && ghCfg.token){
-      const toastProxy = { set textContent(v){ showToast(v); } };
-      ghPush(ghCfg, toastProxy);
-    }
+        const ghCfg = loadGhConfig();
+        if(ghCfg.owner && ghCfg.repo && ghCfg.path && ghCfg.token){
+          const toastProxy = { set textContent(v){ showToast(v); } };
+          ghPush(ghCfg, toastProxy);
+        }
+      }
+    });
   };
   footer.appendChild(clearBtn);
   footer.appendChild(saveBtn);
   app.appendChild(footer);
+  placeFixedButtons(true, footer);
 }
-
-render();
 
 const fsBtn = document.createElement('button');
 fsBtn.textContent = '\u26F6';
-fsBtn.style.cssText = 'position:fixed;bottom:8px;left:8px;z-index:60;background:#111;border:1px solid #333;color:#eee;font-size:14px;width:32px;height:32px;border-radius:4px;';
+function styleFsBtn(){
+  const active = !!document.fullscreenElement;
+  const color = active ? '#eee' : '#666';
+  const underline = 'border-bottom:2px solid ' + (active ? '#eee' : 'transparent') + ';';
+  if(fixedBtnsDocked){
+    fsBtn.style.cssText = 'flex:1;background:none;border:none;' + underline +
+      'color:' + color + ';font-size:20px;font-family:inherit;height:100%;display:flex;align-items:center;justify-content:center;';
+  } else {
+    fsBtn.style.cssText = 'position:fixed;bottom:6px;left:8px;z-index:60;background:none;border:none;' +
+      underline + 'color:' + color + ';font-size:18px;font-family:inherit;padding:4px 6px;';
+  }
+}
 fsBtn.onclick = () => {
   if(!document.fullscreenElement){
     document.documentElement.requestFullscreen().catch(() => {});
@@ -1195,7 +1727,77 @@ fsBtn.onclick = () => {
     document.exitFullscreen();
   }
 };
-document.body.appendChild(fsBtn);
+document.addEventListener('fullscreenchange', styleFsBtn);
+
+const editFixedBtn = document.createElement('button');
+editFixedBtn.textContent = '\u2630';
+function styleEditFixedBtn(){
+  const active = editMode || adminPanelOpen;
+  const color = active ? '#eee' : '#666';
+  const underline = 'border-bottom:2px solid ' + (active ? '#eee' : 'transparent') + ';';
+  if(fixedBtnsDocked){
+    editFixedBtn.style.cssText = 'flex:1;background:none;border:none;' + underline +
+      'color:' + color + ';font-size:20px;font-family:inherit;height:100%;display:flex;align-items:center;justify-content:center;';
+  } else {
+    editFixedBtn.style.cssText = 'position:fixed;bottom:6px;right:8px;z-index:60;background:none;border:none;' +
+      underline + 'color:' + color + ';font-size:18px;font-family:inherit;padding:4px 6px;';
+  }
+}
+
+let editPressTimer = null;
+let editLongPressFired = false;
+
+function startEditPress(ev){
+  ev.preventDefault();
+  editLongPressFired = false;
+  editPressTimer = setTimeout(() => {
+    editLongPressFired = true;
+    adminPanelOpen = !adminPanelOpen;
+    styleEditFixedBtn();
+    render();
+  }, 650);
+}
+function endEditPress(){
+  clearTimeout(editPressTimer);
+  if(!editLongPressFired){
+    editMode = !editMode;
+    styleEditFixedBtn();
+    render();
+  }
+}
+editFixedBtn.addEventListener('pointerdown', startEditPress);
+editFixedBtn.addEventListener('pointerup', endEditPress);
+editFixedBtn.addEventListener('pointerleave', () => clearTimeout(editPressTimer));
+editFixedBtn.addEventListener('contextmenu', (ev) => ev.preventDefault());
+
+let fixedBtnsDocked = false;
+
+function dockFsBtn(footerEl){
+  fixedBtnsDocked = true;
+  styleFsBtn();
+  footerEl.insertBefore(fsBtn, footerEl.firstChild);
+}
+
+function dockEditBtn(footerEl){
+  fixedBtnsDocked = true;
+  styleEditFixedBtn();
+  footerEl.appendChild(editFixedBtn);
+}
+
+function placeFixedButtons(docked, footerEl){
+  fixedBtnsDocked = docked;
+  styleFsBtn();
+  styleEditFixedBtn();
+  if(docked && footerEl){
+    footerEl.insertBefore(fsBtn, footerEl.firstChild);
+    footerEl.appendChild(editFixedBtn);
+  } else {
+    document.body.appendChild(fsBtn);
+    document.body.appendChild(editFixedBtn);
+  }
+}
+
+render();
 </script>
 </body>
 </html>
