@@ -689,18 +689,18 @@ function buildCalendarGrid(monthDate, historyTypeFilter, onPickDay){
   });
 
   const wrap = document.createElement('div');
-  wrap.style.cssText = 'display:flex;flex-direction:column;height:100%;';
+  wrap.style.cssText = 'display:flex;flex-direction:column;padding:0 32px;';
 
   const monthLabel = document.createElement('div');
-  monthLabel.style.cssText = 'font-size:20px;margin-bottom:20px;text-align:center;font-weight:600;';
+  monthLabel.style.cssText = 'font-size:16px;margin-bottom:16px;text-align:center;font-weight:600;';
   monthLabel.textContent = monthDate.toLocaleDateString(undefined,{month:'long',year:'numeric'});
   wrap.appendChild(monthLabel);
 
   const grid = document.createElement('div');
-  grid.style.cssText = 'display:grid;grid-template-columns:repeat(7,1fr);gap:8px;flex:1;';
+  grid.style.cssText = 'display:grid;grid-template-columns:repeat(7,1fr);gap:6px;';
   ['S','M','T','W','T','F','S'].forEach(d => {
     const h = document.createElement('div');
-    h.style.cssText = 'text-align:center;font-size:13px;color:var(--dim);padding-bottom:10px;';
+    h.style.cssText = 'text-align:center;font-size:11px;color:var(--dim);padding-bottom:8px;';
     h.textContent = d;
     grid.appendChild(h);
   });
@@ -710,11 +710,27 @@ function buildCalendarGrid(monthDate, historyTypeFilter, onPickDay){
   for(let day=1; day<=daysInMonth; day++){
     const cell = document.createElement('div');
     const hasData = !!daysWithData[day];
-    cell.style.cssText = 'display:flex;align-items:center;justify-content:center;' +
-      'aspect-ratio:1;font-size:19px;border-radius:10px;' +
-      (hasData ? 'background:#222;color:#fff;font-weight:600;' : 'color:var(--dim);');
-    cell.textContent = day;
+    cell.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:flex-start;' +
+      'aspect-ratio:1;padding-top:6px;border-radius:' + (hasData ? '0' : '10px') + ';' +
+      (hasData ? 'background:#222;' : '');
+
+    const numEl = document.createElement('div');
+    numEl.style.cssText = 'font-size:15px;color:#fff;' + (hasData ? 'font-weight:600;' : '');
+    numEl.textContent = day;
+    cell.appendChild(numEl);
+
     if(hasData){
+      const done = new Set(daysWithData[day].map(i => i.type));
+      const labelEl = document.createElement('div');
+      labelEl.style.cssText = 'display:grid;grid-template-columns:auto auto;gap:0 4px;margin-top:3px;';
+      ['push','pull','legs','core'].forEach(t => {
+        const span = document.createElement('span');
+        span.style.cssText = 'font-size:6px;line-height:1.4;color:' + (done.has(t) ? '#fff' : 'var(--dim)') + ';';
+        span.textContent = t.toUpperCase();
+        labelEl.appendChild(span);
+      });
+      cell.appendChild(labelEl);
+
       cell.onclick = () => onPickDay({date: new Date(year, month, day), items: daysWithData[day]});
     }
     grid.appendChild(cell);
@@ -1085,13 +1101,6 @@ function render(){
   app.appendChild(tabs);
 
   if(adminPanelOpen){
-    const closeRow = document.createElement('button');
-    closeRow.className = 'addbtn';
-    closeRow.textContent = 'close admin panel';
-    closeRow.style.marginBottom = '8px';
-    closeRow.onclick = () => { adminPanelOpen = false; render(); };
-    app.appendChild(closeRow);
-
     const devRow = document.createElement('div');
     devRow.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;';
     const exportBtn = document.createElement('button');
@@ -1187,7 +1196,9 @@ function render(){
     ghPanel.appendChild(ghBtnRow);
     app.appendChild(ghPanel);
 
-    buildBottomBar([]);
+    buildBottomBar({
+      leftButton: {svg: buildLeftChevron(), enabled: true, onclick: () => { adminPanelOpen = false; render(); }}
+    });
     return;
   }
 
@@ -1284,7 +1295,7 @@ function render(){
         render();
       }));
       buildBottomBar({
-        leftButton: calBtn,
+        rightButton: calBtn,
         middleButtons: [
           {svg: buildLeftChevron(), enabled: true, onclick: () => {
             historyCalendarMonth = new Date(historyCalendarMonth.getFullYear(), historyCalendarMonth.getMonth() - 1, 1);
@@ -1324,7 +1335,7 @@ function render(){
         });
       }
       buildBottomBar({
-        leftButton: calBtn,
+        rightButton: calBtn,
         middleButtons: [
           {svg: buildLeftChevron(), disabled: true, onclick: () => {}},
           {svg: buildRightChevron(), disabled: true, onclick: () => {}}
@@ -1392,12 +1403,12 @@ function render(){
     });
 
     const rows = getHistoryRows(historyType);
-    const curIdx = rows.findIndex(r => r.date.getTime() === historySelected.date.getTime());
+    const curIdx = rows.findIndex(r => r.date.toDateString() === historySelected.date.toDateString());
     const canOlder = curIdx !== -1 && curIdx < rows.length - 1;
     const canNewer = curIdx > 0;
 
     buildBottomBar({
-      leftButton: calBtn,
+      rightButton: calBtn,
       middleButtons: [
         {svg: buildLeftChevron(), disabled: !canOlder, onclick: () => {
           if(canOlder){ historySelected = rows[curIdx + 1]; render(); }
@@ -1415,9 +1426,11 @@ function render(){
 
   const nameFont = '14px -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif';
   let maxNameWidth = 0;
-  state.exercises['push'].forEach(ex => {
-    const w = measureTextWidth(ex.name, nameFont);
-    if(w > maxNameWidth) maxNameWidth = w;
+  ['push','pull','legs','core'].forEach(t => {
+    state.catalog[t].forEach(ex => {
+      const w = measureTextWidth(ex.name, nameFont);
+      if(w > maxNameWidth) maxNameWidth = w;
+    });
   });
   maxNameWidth = Math.ceil(maxNameWidth) + 6;
 
