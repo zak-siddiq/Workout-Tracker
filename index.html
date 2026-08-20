@@ -710,8 +710,8 @@ function buildCalendarGrid(monthDate, historyTypeFilter, onPickDay){
   for(let day=1; day<=daysInMonth; day++){
     const cell = document.createElement('div');
     const hasData = !!daysWithData[day];
-    cell.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:flex-start;' +
-      'aspect-ratio:1;padding-top:6px;border-radius:' + (hasData ? '0' : '10px') + ';' +
+    cell.style.cssText = 'display:flex;align-items:center;justify-content:center;' +
+      'aspect-ratio:1;border-radius:' + (hasData ? '0' : '10px') + ';' +
       (hasData ? 'background:#222;' : '');
 
     const numEl = document.createElement('div');
@@ -720,17 +720,6 @@ function buildCalendarGrid(monthDate, historyTypeFilter, onPickDay){
     cell.appendChild(numEl);
 
     if(hasData){
-      const done = new Set(daysWithData[day].map(i => i.type));
-      const labelEl = document.createElement('div');
-      labelEl.style.cssText = 'display:grid;grid-template-columns:auto auto;gap:0 4px;margin-top:3px;';
-      ['push','pull','legs','core'].forEach(t => {
-        const span = document.createElement('span');
-        span.style.cssText = 'font-size:6px;line-height:1.4;color:' + (done.has(t) ? '#fff' : 'var(--dim)') + ';';
-        span.textContent = t.toUpperCase();
-        labelEl.appendChild(span);
-      });
-      cell.appendChild(labelEl);
-
       cell.onclick = () => onPickDay({date: new Date(year, month, day), items: daysWithData[day]});
     }
     grid.appendChild(cell);
