@@ -32,6 +32,7 @@
   }
   .tab{color:var(--dim);font-size:15px;background:none;border:none;padding:6px 4px;}
   .tab.active{color:var(--text);border-bottom:2px solid var(--text);}
+  .tab.recording{color:#e33;border-bottom:2px solid #e33;}
 
   .colhead{
     display:flex;align-items:center;font-size:10px;color:var(--dim);
@@ -420,7 +421,8 @@ function defaultData(){
     exercises: {push: [], pull: [], legs: [], core: []},
     maxWeights: {},
     history: {push:[], pull:[], legs:[], core:[]},
-    drafts: {}
+    drafts: {},
+    sessionStart: {push: null, pull: null, legs: null, core: null}
   };
 }
 
@@ -432,10 +434,12 @@ function load(){
     if(!d.exercises || !d.history) return defaultData();
     if(!d.catalog) d.catalog = defaultCatalog();
     if(!d.drafts) d.drafts = {};
+    if(!d.sessionStart) d.sessionStart = {};
     ['push','pull','legs','core'].forEach(t => {
       if(!d.history[t]) d.history[t] = [];
       if(!d.exercises[t]) d.exercises[t] = [];
       if(!d.catalog[t]) d.catalog[t] = [];
+      if(d.sessionStart[t] === undefined) d.sessionStart[t] = null;
     });
     return d;
   }catch(e){ return defaultData(); }
@@ -457,11 +461,26 @@ let historyCalendarOpen = false;
 let historyCalendarMonth = null;
 let chartSelectedIdx = null;
 
-function emptySets(n, scheme, maxWeight){
-  const reps = schemeReps(scheme);
+function lastSessionMode(type, exerciseId){
+  const recs = state.history[type];
+  for(let i=0;i<recs.length;i++){
+    const entry = recs[i].entries.find(e => e.exerciseId === exerciseId);
+    if(entry){
+      const w = modeWeight(entry.sets);
+      const r = modeReps(entry.sets);
+      if(w !== null || r !== null) return {weight: w, reps: r};
+    }
+  }
+  return {weight: null, reps: null};
+}
+
+function emptySets(n, scheme, lastMode){
+  const fallbackReps = schemeReps(scheme);
+  const reps = (lastMode && lastMode.reps !== null && lastMode.reps !== undefined) ? lastMode.reps : fallbackReps;
+  const weight = (lastMode && lastMode.weight !== null && lastMode.weight !== undefined) ? lastMode.weight : '';
   return Array.from({length:n}, () => ({
     reps: reps ? String(reps) : '',
-    weight: maxWeight ? String(maxWeight) : '',
+    weight: weight !== '' ? String(weight) : '',
     done:false
   }));
 }
@@ -471,12 +490,12 @@ function draftFor(type){
   const d = state.drafts[type];
   state.exercises[type].forEach(ex => {
     const n = schemeSetCount(ex.scheme);
-    const maxW = state.maxWeights[ex.id];
-    if(!d[ex.id]) d[ex.id] = {sets: emptySets(n, ex.scheme, maxW)};
+    const lastMode = lastSessionMode(type, ex.id);
+    if(!d[ex.id]) d[ex.id] = {sets: emptySets(n, ex.scheme, lastMode)};
     while(d[ex.id].sets.length < n){
       d[ex.id].sets.push({
-        reps: schemeReps(ex.scheme) ? String(schemeReps(ex.scheme)) : '',
-        weight: maxW ? String(maxW) : '',
+        reps: (lastMode.reps !== null ? lastMode.reps : schemeReps(ex.scheme)) ? String(lastMode.reps !== null ? lastMode.reps : schemeReps(ex.scheme)) : '',
+        weight: lastMode.weight !== null ? String(lastMode.weight) : '',
         done:false
       });
     }
@@ -497,6 +516,42 @@ function modeReps(sets){
   let best = null, bestCount = 0;
   Object.keys(counts).forEach(k => {
     const n = parseInt(k, 10);
+    if(counts[k] > bestCount || (counts[k] === bestCount && (best === null || n > best))){
+      best = n; bestCount = counts[k];
+    }
+  });
+  return best;
+}
+
+function nowHHMMSS(){
+  const d = new Date();
+  return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0') + ':' + String(d.getSeconds()).padStart(2,'0');
+}
+
+function hhmmssToSeconds(s){
+  const parts = s.split(':').map(Number);
+  return (parts[0] || 0) * 3600 + (parts[1] || 0) * 60 + (parts[2] || 0);
+}
+
+function formatDuration(startStr, endStr){
+  if(!startStr || !endStr) return null;
+  let diff = hhmmssToSeconds(endStr) - hhmmssToSeconds(startStr);
+  if(diff < 0) diff += 24 * 3600;
+  const h = Math.floor(diff / 3600);
+  const m = Math.floor((diff % 3600) / 60);
+  const s = diff % 60;
+  return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+
+function modeWeight(sets){
+  const counts = {};
+  sets.forEach(s => {
+    const w = parseFloat(s.weight);
+    if(!isNaN(w)) counts[w] = (counts[w] || 0) + 1;
+  });
+  let best = null, bestCount = 0;
+  Object.keys(counts).forEach(k => {
+    const n = parseFloat(k);
     if(counts[k] > bestCount || (counts[k] === bestCount && (best === null || n > best))){
       best = n; bestCount = counts[k];
     }
@@ -672,7 +727,7 @@ function buildCalendarGrid(monthDate, historyTypeFilter, onPickDay){
   const year = monthDate.getFullYear();
   const month = monthDate.getMonth();
   const firstDay = new Date(year, month, 1);
-  const startWeekday = firstDay.getDay();
+  const startWeekday = (firstDay.getDay() + 6) % 7;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
   const daysWithData = {};
@@ -698,7 +753,7 @@ function buildCalendarGrid(monthDate, historyTypeFilter, onPickDay){
 
   const grid = document.createElement('div');
   grid.style.cssText = 'display:grid;grid-template-columns:repeat(7,1fr);gap:6px;';
-  ['S','M','T','W','T','F','S'].forEach(d => {
+  ['M','T','W','T','F','S','S'].forEach(d => {
     const h = document.createElement('div');
     h.style.cssText = 'text-align:center;font-size:11px;color:var(--dim);padding-bottom:8px;';
     h.textContent = d;
@@ -838,10 +893,12 @@ function normalizeState(d){
   if(!d.maxWeights) d.maxWeights = {};
   if(!d.history) d.history = {};
   if(!d.exercises) d.exercises = {};
+  if(!d.sessionStart) d.sessionStart = {};
   ['push','pull','legs','core'].forEach(t => {
     if(!d.history[t]) d.history[t] = [];
     if(!d.exercises[t]) d.exercises[t] = [];
     if(!d.catalog[t]) d.catalog[t] = [];
+    if(d.sessionStart[t] === undefined) d.sessionStart[t] = null;
   });
   return d;
 }
@@ -933,6 +990,68 @@ function showModal(message, opts){
 
 function showAlert(message){
   showModal(message, {showCancel: false, confirmLabel: 'OK'});
+}
+
+function showTimeEditModal(rec, onSave){
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;';
+
+  const box = document.createElement('div');
+  box.style.cssText = 'background:#111;border:1px solid #333;border-radius:8px;padding:20px;max-width:300px;width:100%;font-family:inherit;';
+
+  const heading = document.createElement('div');
+  heading.style.cssText = 'color:#eee;font-size:14px;margin-bottom:16px;text-align:center;';
+  heading.textContent = 'Workout time';
+  box.appendChild(heading);
+
+  function mkTimeField(labelText, value){
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'margin-bottom:12px;';
+    const label = document.createElement('div');
+    label.style.cssText = 'color:var(--dim);font-size:11px;margin-bottom:4px;';
+    label.textContent = labelText;
+    wrap.appendChild(label);
+    const input = document.createElement('input');
+    input.type = 'time';
+    input.step = '1';
+    input.value = value || '';
+    input.style.cssText = 'width:100%;background:#000;border:1px solid #333;color:#eee;padding:8px;border-radius:6px;font-family:inherit;font-size:14px;';
+    wrap.appendChild(input);
+    box.appendChild(wrap);
+    return input;
+  }
+
+  const startInput = mkTimeField('start', rec.startTime);
+  const endInput = mkTimeField('end', rec.endTime);
+
+  const btnRow = document.createElement('div');
+  btnRow.style.cssText = 'display:flex;gap:10px;margin-top:6px;';
+
+  function close(){
+    if(overlay.parentNode) document.body.removeChild(overlay);
+  }
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.style.cssText = 'flex:1;background:none;border:1px solid #444;color:#999;padding:10px;border-radius:6px;font-family:inherit;font-size:14px;';
+  cancelBtn.onclick = close;
+  btnRow.appendChild(cancelBtn);
+
+  const saveTimeBtn = document.createElement('button');
+  saveTimeBtn.textContent = 'Save';
+  saveTimeBtn.style.cssText = 'flex:1;background:#eee;border:none;color:#111;padding:10px;border-radius:6px;font-family:inherit;font-size:14px;font-weight:600;';
+  saveTimeBtn.onclick = () => {
+    rec.startTime = startInput.value || null;
+    rec.endTime = endInput.value || null;
+    save();
+    close();
+    if(onSave) onSave();
+  };
+  btnRow.appendChild(saveTimeBtn);
+
+  box.appendChild(btnRow);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
 }
 
 function showToast(msg){
@@ -1057,9 +1176,16 @@ function render(){
   });
   const right = document.createElement('div');
   const recordBtn = document.createElement('button');
-  recordBtn.className = 'tab' + (view==='workout' ? ' active' : '');
+  const recording = view==='workout' && !!state.sessionStart[currentType];
+  recordBtn.className = 'tab' + (view==='workout' ? (recording ? ' recording' : ' active') : '');
   recordBtn.textContent = 'RECORD';
-  recordBtn.onclick = () => { view='workout'; expandedId=null; render(); };
+  recordBtn.onclick = () => {
+    if(view === 'workout' && !state.sessionStart[currentType]){
+      state.sessionStart[currentType] = nowHHMMSS();
+      save();
+    }
+    view='workout'; expandedId=null; render();
+  };
   const statsBtn = document.createElement('button');
   statsBtn.className = 'tab' + (view==='stats' ? ' active' : '');
   statsBtn.textContent = 'STATS';
@@ -1232,12 +1358,8 @@ function render(){
       state.history[statsSelected.type].forEach(rec => {
         const entry = rec.entries.find(e => e.exerciseId === statsSelected.id);
         if(!entry) return;
-        let max = null;
-        entry.sets.forEach(s => {
-          const w = parseFloat(s.weight);
-          if(!isNaN(w) && (max === null || w > max)) max = w;
-        });
-        if(max !== null) points.push({date: new Date(rec.date), weight: max});
+        const modeW = modeWeight(entry.sets);
+        if(modeW !== null) points.push({date: new Date(rec.date), weight: modeW});
       });
       points.sort((a,b) => a.date - b.date);
 
@@ -1350,12 +1472,30 @@ function render(){
     app.appendChild(title);
 
     recs.forEach(({type, rec}) => {
+      const headerRow = document.createElement('div');
+      headerRow.style.cssText = 'display:flex;align-items:flex-start;justify-content:space-between;margin:10px 0 4px;';
+
       if(recs.length > 1){
         const groupLabel = document.createElement('div');
-        groupLabel.style.cssText = 'font-size:12px;color:var(--dim);margin:10px 0 4px;text-transform:uppercase;';
+        groupLabel.style.cssText = 'font-size:12px;color:var(--dim);text-transform:uppercase;';
         groupLabel.textContent = type;
-        app.appendChild(groupLabel);
+        headerRow.appendChild(groupLabel);
+      } else {
+        headerRow.appendChild(document.createElement('div'));
       }
+
+      const timeBtn = document.createElement('div');
+      timeBtn.style.cssText = 'text-align:right;font-size:10px;color:var(--dim);line-height:1.6;cursor:pointer;';
+      if(rec.startTime && rec.endTime){
+        const dur = formatDuration(rec.startTime, rec.endTime);
+        timeBtn.innerHTML = `<div>start ${rec.startTime}</div><div>end ${rec.endTime}</div><div>duration ${dur}</div>`;
+      } else {
+        timeBtn.textContent = 'add time';
+      }
+      timeBtn.onclick = () => showTimeEditModal(rec, () => render());
+      headerRow.appendChild(timeBtn);
+
+      app.appendChild(headerRow);
 
       const entries = rec.entries.filter(e => e.sets.some(st => st.reps !== '' || st.weight !== ''));
       let maxSets = 1;
@@ -1624,7 +1764,7 @@ function render(){
       row.onclick = () => {
         const scheme = '3x10';
         state.exercises[type].push({id: c.id, tag: c.tag, name: c.name, scheme});
-        draft[c.id] = {sets: emptySets(schemeSetCount(scheme), scheme, state.maxWeights[c.id])};
+        draft[c.id] = {sets: emptySets(schemeSetCount(scheme), scheme, lastSessionMode(type, c.id))};
         save(); render();
       };
       app.appendChild(row);
@@ -1663,8 +1803,9 @@ function render(){
     showModal('Are you sure? This will clear today\'s entries.', {
       onConfirm: () => {
         state.exercises[type].forEach(ex => {
-          draft[ex.id] = {sets: emptySets(schemeSetCount(ex.scheme), ex.scheme, state.maxWeights[ex.id])};
+          draft[ex.id] = {sets: emptySets(schemeSetCount(ex.scheme), ex.scheme, lastSessionMode(type, ex.id))};
         });
+        state.sessionStart[type] = null;
         expandedId = null;
         save(); render();
       }
@@ -1687,9 +1828,12 @@ function render(){
           });
           return {exerciseId:ex.id, tag:ex.tag, name:ex.name, scheme:ex.scheme, sets: d.sets.map(s=>({reps:s.reps,weight:s.weight}))};
         });
-        state.history[type].unshift({date:new Date().toISOString(), type, entries});
+        const startTime = state.sessionStart[type];
+        const endTime = nowHHMMSS();
+        state.history[type].unshift({date:new Date().toISOString(), type, startTime, endTime, entries});
+        state.sessionStart[type] = null;
         state.exercises[type].forEach(ex => {
-          draft[ex.id] = {sets: emptySets(schemeSetCount(ex.scheme), ex.scheme, state.maxWeights[ex.id])};
+          draft[ex.id] = {sets: emptySets(schemeSetCount(ex.scheme), ex.scheme, lastSessionMode(type, ex.id))};
         });
         expandedId = null;
         save(); render();
