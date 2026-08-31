@@ -563,21 +563,37 @@ function prevMax(id){ return state.maxWeights[id] || null; }
 
 function buildChart(points, selectedIdx, onSelect){
   const NS = 'http://www.w3.org/2000/svg';
-  const W = 300, H = 180, padL = 34, padR = 10, padT = 10, padB = 24;
+  const W = 300, H = 200, padL = 30, padR = 30, padT = 22, padB = 30;
   const plotW = W - padL - padR;
   const plotH = H - padT - padB;
 
+  const weightPoints = points.filter(p => p.weight !== null && p.weight !== undefined);
+  const repsPoints = points.filter(p => p.reps !== null && p.reps !== undefined);
+
   const xs = points.map(p => p.date.getTime());
-  const ys = points.map(p => p.weight);
   let xmin = Math.min(...xs), xmax = Math.max(...xs);
-  let ymin = Math.min(...ys), ymax = Math.max(...ys);
   if(xmin === xmax){ xmin -= 1; xmax += 1; }
-  if(ymin === ymax){ ymin -= 1; ymax += 1; }
-  const ypad = (ymax - ymin) * 0.15;
-  ymin -= ypad; ymax += ypad;
+
+  let wMin = 0, wMax = 1;
+  if(weightPoints.length){
+    const ws = weightPoints.map(p => p.weight);
+    wMin = Math.min(...ws); wMax = Math.max(...ws);
+    if(wMin === wMax){ wMin -= 1; wMax += 1; }
+    const pad = (wMax - wMin) * 0.15;
+    wMin -= pad; wMax += pad;
+  }
+
+  let rMin = 0, rMax = 1;
+  if(repsPoints.length){
+    const rs = repsPoints.map(p => p.reps);
+    rMin = 0; rMax = Math.max(...rs);
+    if(rMax === 0) rMax = 1;
+    rMax += rMax * 0.15;
+  }
 
   const sx = t => padL + ((t - xmin) / (xmax - xmin)) * plotW;
-  const sy = w => padT + plotH - ((w - ymin) / (ymax - ymin)) * plotH;
+  const syW = w => padT + plotH - ((w - wMin) / (wMax - wMin)) * plotH;
+  const syR = r => padT + plotH - ((r - rMin) / (rMax - rMin)) * plotH;
   const fmtDate = d => d.toLocaleDateString(undefined,{month:'short',day:'numeric'});
 
   const svg = document.createElementNS(NS, 'svg');
@@ -591,18 +607,48 @@ function buildChart(points, selectedIdx, onSelect){
     return e;
   }
 
+  const headL = el('text', {x:padL, y:12, fill:'#888', 'font-size':9, 'font-family':'monospace'});
+  headL.textContent = 'kg';
+  svg.appendChild(headL);
+  const headR = el('text', {x:padL+plotW, y:12, fill:'#666', 'font-size':9, 'font-family':'monospace', 'text-anchor':'end'});
+  headR.textContent = 'reps';
+  svg.appendChild(headR);
+
   svg.appendChild(el('line', {x1:padL, y1:padT, x2:padL, y2:padT+plotH, stroke:'#333'}));
   svg.appendChild(el('line', {x1:padL, y1:padT+plotH, x2:padL+plotW, y2:padT+plotH, stroke:'#333'}));
 
-  const yMaxLabel = el('text', {x:2, y:sy(ymax)+4, fill:'#888', 'font-size':10, 'font-family':'monospace'});
-  yMaxLabel.textContent = Math.round(ymax);
-  svg.appendChild(yMaxLabel);
-  const yMinLabel = el('text', {x:2, y:sy(ymin)+4, fill:'#888', 'font-size':10, 'font-family':'monospace'});
-  yMinLabel.textContent = Math.round(ymin);
-  svg.appendChild(yMinLabel);
+  if(weightPoints.length){
+    const yMaxLabel = el('text', {x:2, y:syW(wMax)+4, fill:'#888', 'font-size':10, 'font-family':'monospace'});
+    yMaxLabel.textContent = Math.round(wMax);
+    svg.appendChild(yMaxLabel);
+    const yMinLabel = el('text', {x:2, y:syW(wMin)+4, fill:'#888', 'font-size':10, 'font-family':'monospace'});
+    yMinLabel.textContent = Math.round(wMin);
+    svg.appendChild(yMinLabel);
+  }
+  if(repsPoints.length){
+    const yMaxLabelR = el('text', {x:W-2, y:padT+4, fill:'#666', 'font-size':10, 'font-family':'monospace', 'text-anchor':'end'});
+    yMaxLabelR.textContent = Math.round(rMax);
+    svg.appendChild(yMaxLabelR);
+    const yMinLabelR = el('text', {x:W-2, y:padT+plotH+4, fill:'#666', 'font-size':10, 'font-family':'monospace', 'text-anchor':'end'});
+    yMinLabelR.textContent = '0';
+    svg.appendChild(yMinLabelR);
+  }
 
-  const pathD = points.map((p,i) => (i===0?'M':'L') + sx(p.date.getTime()).toFixed(1) + ',' + sy(p.weight).toFixed(1)).join(' ');
-  svg.appendChild(el('path', {d:pathD, fill:'none', stroke:'#eee', 'stroke-width':1.5}));
+  const barW = Math.max(8, Math.min(28, plotW / points.length * 0.75));
+  repsPoints.forEach(p => {
+    const cx = sx(p.date.getTime());
+    const y = syR(p.reps);
+    svg.appendChild(el('rect', {
+      x: (cx - barW/2).toFixed(1), y: y.toFixed(1),
+      width: barW.toFixed(1), height: (padT + plotH - y).toFixed(1),
+      rx: 2, fill: '#2a2a2a'
+    }));
+  });
+
+  if(weightPoints.length){
+    const pathD = weightPoints.map((p,i) => (i===0?'M':'L') + sx(p.date.getTime()).toFixed(1) + ',' + syW(p.weight).toFixed(1)).join(' ');
+    svg.appendChild(el('path', {d:pathD, fill:'none', stroke:'#eee', 'stroke-width':2}));
+  }
 
   const xStartLabel = el('text', {x:padL, y:H-6, fill:'#888', 'font-size':10, 'font-family':'monospace'});
   xStartLabel.textContent = fmtDate(points[0].date);
@@ -613,14 +659,20 @@ function buildChart(points, selectedIdx, onSelect){
 
   if(selectedIdx !== null && points[selectedIdx]){
     const p = points[selectedIdx];
-    const px = sx(p.date.getTime()), py = sy(p.weight);
+    const px = sx(p.date.getTime());
 
-    svg.appendChild(el('line', {x1:padL, y1:py, x2:px, y2:py, stroke:'#666', 'stroke-dasharray':'2,2'}));
-    svg.appendChild(el('line', {x1:px, y1:py, x2:px, y2:padT+plotH, stroke:'#666', 'stroke-dasharray':'2,2'}));
+    svg.appendChild(el('line', {x1:px, y1:padT, x2:px, y2:padT+plotH, stroke:'#666', 'stroke-dasharray':'2,2'}));
 
-    const wLabel = el('text', {x:2, y:py-4, fill:'#fff', 'font-size':11, 'font-family':'monospace', 'font-weight':'bold'});
-    wLabel.textContent = p.weight;
-    svg.appendChild(wLabel);
+    if(p.weight !== null && p.weight !== undefined){
+      const wLabel = el('text', {x:2, y:syW(p.weight)-4, fill:'#fff', 'font-size':11, 'font-family':'monospace', 'font-weight':'bold'});
+      wLabel.textContent = p.weight + 'kg';
+      svg.appendChild(wLabel);
+    }
+    if(p.reps !== null && p.reps !== undefined){
+      const rLabel = el('text', {x:W-2, y:16, fill:'#fff', 'font-size':11, 'font-family':'monospace', 'font-weight':'bold', 'text-anchor':'end'});
+      rLabel.textContent = p.reps + ' reps';
+      svg.appendChild(rLabel);
+    }
 
     const dLabelX = Math.min(Math.max(px, padL+2), padL+plotW-40);
     const dLabel = el('text', {x:dLabelX, y:H-6, fill:'#fff', 'font-size':10, 'font-family':'monospace', 'font-weight':'bold'});
@@ -628,11 +680,12 @@ function buildChart(points, selectedIdx, onSelect){
     svg.appendChild(dLabel);
   }
 
-  points.forEach((p, i) => {
+  weightPoints.forEach((p) => {
+    const i = points.indexOf(p);
     const isSel = i === selectedIdx;
     const dot = el('circle', {
       cx: sx(p.date.getTime()).toFixed(1),
-      cy: sy(p.weight).toFixed(1),
+      cy: syW(p.weight).toFixed(1),
       r: isSel ? 5 : 3,
       fill: isSel ? '#fff' : '#eee'
     });
@@ -642,7 +695,7 @@ function buildChart(points, selectedIdx, onSelect){
 
     const hit = el('circle', {
       cx: sx(p.date.getTime()).toFixed(1),
-      cy: sy(p.weight).toFixed(1),
+      cy: syW(p.weight).toFixed(1),
       r: 10,
       fill: 'transparent'
     });
@@ -653,6 +706,15 @@ function buildChart(points, selectedIdx, onSelect){
 
   const wrap = document.createElement('div');
   wrap.appendChild(svg);
+
+  const legend = document.createElement('div');
+  legend.style.cssText = 'display:flex;justify-content:center;gap:16px;margin-top:8px;font-size:10px;color:#888;';
+  legend.innerHTML = `
+    <span><span style="display:inline-block;width:14px;height:2px;background:#eee;vertical-align:middle;margin-right:5px;"></span>weight</span>
+    <span><span style="display:inline-block;width:10px;height:10px;background:#2a2a2a;border-radius:2px;vertical-align:middle;margin-right:5px;"></span>reps</span>
+  `;
+  wrap.appendChild(legend);
+
   return wrap;
 }
 
@@ -1068,6 +1130,90 @@ function showToast(msg){
   toast._t = setTimeout(() => { toast.style.opacity = '0'; }, 2500);
 }
 
+function buildTCX(rec){
+  const startTime = rec.startTime || '00:00:00';
+  const endTime = rec.endTime || startTime;
+  const dateOnly = rec.date.slice(0, 10);
+  const startIso = new Date(dateOnly + 'T' + startTime).toISOString();
+  const durationSec = rec.startTime && rec.endTime
+    ? hhmmssToSeconds(rec.endTime) - hhmmssToSeconds(rec.startTime)
+    : 0;
+  const durationClamped = durationSec > 0 ? durationSec : 0;
+
+  const entryLines = rec.entries
+    .filter(e => e.sets.some(s => s.reps !== '' || s.weight !== ''))
+    .map(e => {
+      const setsStr = e.sets
+        .filter(s => s.reps !== '' || s.weight !== '')
+        .map(s => (s.reps || '-') + '@' + (s.weight || '-'))
+        .join(',');
+      return e.name + ': ' + setsStr;
+    })
+    .join('. ');
+
+  const notes = (rec.type.toUpperCase() + ' session. ' + entryLines)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<TrainingCenterDatabase xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2">
+  <Activities>
+    <Activity Sport="Other">
+      <Id>${startIso}</Id>
+      <Lap StartTime="${startIso}">
+        <TotalTimeSeconds>${durationClamped}</TotalTimeSeconds>
+        <DistanceMeters>0</DistanceMeters>
+        <Calories>0</Calories>
+        <Intensity>Active</Intensity>
+        <TriggerMethod>Manual</TriggerMethod>
+        <Notes>${notes}</Notes>
+      </Lap>
+      <Creator xsi:type="Device_t" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <Name>WorkoutApp</Name>
+        <UnitId>0</UnitId>
+        <ProductID>0</ProductID>
+        <Version><VersionMajor>1</VersionMajor><VersionMinor>0</VersionMinor><BuildMajor>0</BuildMajor><BuildMinor>0</BuildMinor></Version>
+      </Creator>
+    </Activity>
+  </Activities>
+</TrainingCenterDatabase>`;
+}
+
+async function ghPushFile(cfg, path, content, statusEl){
+  const url = `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${encodeURIComponent(path)}`;
+  const headers = {
+    'Authorization': 'Bearer ' + cfg.token,
+    'Accept': 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28'
+  };
+  try{
+    let sha = null;
+    const getRes = await fetch(url, {headers});
+    if(getRes.status === 200){
+      const j = await getRes.json();
+      sha = j.sha;
+    } else if(getRes.status !== 404){
+      if(statusEl) statusEl.textContent = 'tcx push error (' + getRes.status + ')';
+      return false;
+    }
+    const body = {
+      message: 'tcx export ' + path,
+      content: b64EncodeUnicode(content)
+    };
+    if(sha) body.sha = sha;
+    const putRes = await fetch(url, {method:'PUT', headers, body: JSON.stringify(body)});
+    if(putRes.ok){
+      if(statusEl) statusEl.textContent = 'tcx saved ' + new Date().toLocaleTimeString();
+      return true;
+    } else {
+      if(statusEl) statusEl.textContent = 'tcx push failed (' + putRes.status + ')';
+      return false;
+    }
+  }catch(e){
+    if(statusEl) statusEl.textContent = 'tcx network error: ' + e.message;
+    return false;
+  }
+}
+
 async function ghPush(cfg, statusEl){
   if(!cfg.owner || !cfg.repo || !cfg.path || !cfg.token){
     statusEl.textContent = 'fill in owner, repo, path and token first';
@@ -1358,8 +1504,9 @@ function render(){
       state.history[statsSelected.type].forEach(rec => {
         const entry = rec.entries.find(e => e.exerciseId === statsSelected.id);
         if(!entry) return;
-        const modeW = modeWeight(entry.sets);
-        if(modeW !== null) points.push({date: new Date(rec.date), weight: modeW});
+        const w = modeWeight(entry.sets);
+        const r = modeReps(entry.sets);
+        if(w !== null || r !== null) points.push({date: new Date(rec.date), weight: w, reps: r});
       });
       points.sort((a,b) => a.date - b.date);
 
@@ -1493,7 +1640,29 @@ function render(){
         timeBtn.textContent = 'add time';
       }
       timeBtn.onclick = () => showTimeEditModal(rec, () => render());
-      headerRow.appendChild(timeBtn);
+
+      const tcxLink = document.createElement('div');
+      tcxLink.style.cssText = 'text-align:right;font-size:10px;color:var(--dim);text-decoration:underline;margin-top:4px;cursor:pointer;';
+      tcxLink.textContent = 'download tcx';
+      tcxLink.onclick = (ev) => {
+        ev.stopPropagation();
+        const content = buildTCX(rec);
+        const blob = new Blob([content], {type: 'application/vnd.garmin.tcx+xml'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const dateOnly = rec.date.slice(0, 10);
+        a.href = url;
+        a.download = rec.type + '-' + dateOnly + '.tcx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      };
+
+      const timeCol = document.createElement('div');
+      timeCol.appendChild(timeBtn);
+      timeCol.appendChild(tcxLink);
+      headerRow.appendChild(timeCol);
 
       app.appendChild(headerRow);
 
@@ -1830,7 +1999,8 @@ function render(){
         });
         const startTime = state.sessionStart[type];
         const endTime = nowHHMMSS();
-        state.history[type].unshift({date:new Date().toISOString(), type, startTime, endTime, entries});
+        const savedRec = {date:new Date().toISOString(), type, startTime, endTime, entries};
+        state.history[type].unshift(savedRec);
         state.sessionStart[type] = null;
         state.exercises[type].forEach(ex => {
           draft[ex.id] = {sets: emptySets(schemeSetCount(ex.scheme), ex.scheme, lastSessionMode(type, ex.id))};
@@ -1842,6 +2012,12 @@ function render(){
         if(ghCfg.owner && ghCfg.repo && ghCfg.path && ghCfg.token){
           const toastProxy = { set textContent(v){ showToast(v); } };
           ghPush(ghCfg, toastProxy);
+
+          const dateOnly = savedRec.date.slice(0, 10);
+          const timeSafe = (savedRec.startTime || 'notime').replace(/:/g, '-');
+          const tcxPath = 'tcx/' + savedRec.type + '-' + dateOnly + '-' + timeSafe + '.tcx';
+          const tcxContent = buildTCX(savedRec);
+          setTimeout(() => { ghPushFile(ghCfg, tcxPath, tcxContent, toastProxy); }, 1500);
         }
       }
     });
