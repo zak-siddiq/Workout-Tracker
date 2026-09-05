@@ -607,6 +607,10 @@ function buildChart(points, selectedIdx, onSelect){
     return e;
   }
 
+  const bg = el('rect', {x:0, y:0, width:W, height:H, fill:'transparent'});
+  bg.addEventListener('click', () => onSelect(null));
+  svg.appendChild(bg);
+
   const headL = el('text', {x:padL, y:12, fill:'#888', 'font-size':9, 'font-family':'monospace'});
   headL.textContent = 'kg';
   svg.appendChild(headL);
@@ -615,6 +619,7 @@ function buildChart(points, selectedIdx, onSelect){
   svg.appendChild(headR);
 
   svg.appendChild(el('line', {x1:padL, y1:padT, x2:padL, y2:padT+plotH, stroke:'#333'}));
+  svg.appendChild(el('line', {x1:padL+plotW, y1:padT, x2:padL+plotW, y2:padT+plotH, stroke:'#333'}));
   svg.appendChild(el('line', {x1:padL, y1:padT+plotH, x2:padL+plotW, y2:padT+plotH, stroke:'#333'}));
 
   if(weightPoints.length){
@@ -634,16 +639,10 @@ function buildChart(points, selectedIdx, onSelect){
     svg.appendChild(yMinLabelR);
   }
 
-  const barW = Math.max(8, Math.min(28, plotW / points.length * 0.75));
-  repsPoints.forEach(p => {
-    const cx = sx(p.date.getTime());
-    const y = syR(p.reps);
-    svg.appendChild(el('rect', {
-      x: (cx - barW/2).toFixed(1), y: y.toFixed(1),
-      width: barW.toFixed(1), height: (padT + plotH - y).toFixed(1),
-      rx: 2, fill: '#2a2a2a'
-    }));
-  });
+  if(repsPoints.length){
+    const pathD = repsPoints.map((p,i) => (i===0?'M':'L') + sx(p.date.getTime()).toFixed(1) + ',' + syR(p.reps).toFixed(1)).join(' ');
+    svg.appendChild(el('path', {d:pathD, fill:'none', stroke:'#888', 'stroke-width':1.5, 'stroke-dasharray':'4,3'}));
+  }
 
   if(weightPoints.length){
     const pathD = weightPoints.map((p,i) => (i===0?'M':'L') + sx(p.date.getTime()).toFixed(1) + ',' + syW(p.weight).toFixed(1)).join(' ');
@@ -661,17 +660,17 @@ function buildChart(points, selectedIdx, onSelect){
     const p = points[selectedIdx];
     const px = sx(p.date.getTime());
 
-    svg.appendChild(el('line', {x1:px, y1:padT, x2:px, y2:padT+plotH, stroke:'#666', 'stroke-dasharray':'2,2'}));
+    svg.appendChild(el('line', {x1:px, y1:padT, x2:px, y2:padT+plotH, stroke:'#555', 'stroke-dasharray':'2,2'}));
 
+    if(p.reps !== null && p.reps !== undefined){
+      const rLabel = el('text', {x:px, y:padT+12, fill:'#ccc', 'font-size':11, 'font-family':'monospace', 'font-weight':'bold', 'text-anchor':'middle'});
+      rLabel.textContent = p.reps + 'r';
+      svg.appendChild(rLabel);
+    }
     if(p.weight !== null && p.weight !== undefined){
-      const wLabel = el('text', {x:2, y:syW(p.weight)-4, fill:'#fff', 'font-size':11, 'font-family':'monospace', 'font-weight':'bold'});
+      const wLabel = el('text', {x:px, y:padT+plotH-6, fill:'#fff', 'font-size':11, 'font-family':'monospace', 'font-weight':'bold', 'text-anchor':'middle'});
       wLabel.textContent = p.weight + 'kg';
       svg.appendChild(wLabel);
-    }
-    if(p.reps !== null && p.reps !== undefined){
-      const rLabel = el('text', {x:W-2, y:16, fill:'#fff', 'font-size':11, 'font-family':'monospace', 'font-weight':'bold', 'text-anchor':'end'});
-      rLabel.textContent = p.reps + ' reps';
-      svg.appendChild(rLabel);
     }
 
     const dLabelX = Math.min(Math.max(px, padL+2), padL+plotW-40);
@@ -680,25 +679,28 @@ function buildChart(points, selectedIdx, onSelect){
     svg.appendChild(dLabel);
   }
 
+  repsPoints.forEach((p) => {
+    const i = points.indexOf(p);
+    const cx = sx(p.date.getTime()).toFixed(1);
+    const cy = syR(p.reps).toFixed(1);
+
+    const hit = el('circle', {cx, cy, r:10, fill:'transparent'});
+    hit.style.cursor = 'pointer';
+    hit.addEventListener('click', () => onSelect(i));
+    svg.appendChild(hit);
+  });
+
   weightPoints.forEach((p) => {
     const i = points.indexOf(p);
     const isSel = i === selectedIdx;
-    const dot = el('circle', {
-      cx: sx(p.date.getTime()).toFixed(1),
-      cy: syW(p.weight).toFixed(1),
-      r: isSel ? 5 : 3,
-      fill: isSel ? '#fff' : '#eee'
-    });
+    const cx = sx(p.date.getTime()).toFixed(1);
+    const cy = syW(p.weight).toFixed(1);
+    const dot = el('circle', {cx, cy, r: isSel ? 5 : 3, fill: isSel ? '#fff' : '#eee'});
     dot.style.cursor = 'pointer';
     dot.addEventListener('click', () => onSelect(i));
     svg.appendChild(dot);
 
-    const hit = el('circle', {
-      cx: sx(p.date.getTime()).toFixed(1),
-      cy: syW(p.weight).toFixed(1),
-      r: 10,
-      fill: 'transparent'
-    });
+    const hit = el('circle', {cx, cy, r:10, fill:'transparent'});
     hit.style.cursor = 'pointer';
     hit.addEventListener('click', () => onSelect(i));
     svg.appendChild(hit);
@@ -711,7 +713,7 @@ function buildChart(points, selectedIdx, onSelect){
   legend.style.cssText = 'display:flex;justify-content:center;gap:16px;margin-top:8px;font-size:10px;color:#888;';
   legend.innerHTML = `
     <span><span style="display:inline-block;width:14px;height:2px;background:#eee;vertical-align:middle;margin-right:5px;"></span>weight</span>
-    <span><span style="display:inline-block;width:10px;height:10px;background:#2a2a2a;border-radius:2px;vertical-align:middle;margin-right:5px;"></span>reps</span>
+    <span><span style="display:inline-block;width:14px;height:0;border-top:1.5px dashed #888;vertical-align:middle;margin-right:5px;"></span>reps</span>
   `;
   wrap.appendChild(legend);
 
@@ -1492,10 +1494,32 @@ function render(){
     }
 
     const ex = state.exercises[statsSelected.type].find(e => e.id === statsSelected.id);
+    const variants = ex ? state.exercises[statsSelected.type].filter(e => e.name.toLowerCase() === ex.name.toLowerCase()) : [];
+
     const title = document.createElement('div');
     title.className = 'stat-title';
-    title.textContent = ex ? (ex.tag + ' ' + ex.name) : '';
+    title.textContent = ex ? (variants.length > 1 ? ex.name : (ex.tag + ' ' + ex.name)) : '';
     app.appendChild(title);
+
+    if(variants.length > 1){
+      const toggleRow = document.createElement('div');
+      toggleRow.style.cssText = 'display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;';
+      variants.forEach(v => {
+        const pill = document.createElement('button');
+        const isActive = v.id === statsSelected.id;
+        pill.textContent = v.tag;
+        pill.style.cssText = 'background:none;border:1px solid ' + (isActive ? '#fff' : '#333') + ';' +
+          'color:' + (isActive ? '#fff' : 'var(--dim)') + ';font-family:inherit;font-size:12px;' +
+          'padding:5px 12px;border-radius:14px;';
+        pill.onclick = () => {
+          statsSelected = {type: statsSelected.type, id: v.id};
+          chartSelectedIdx = null;
+          render();
+        };
+        toggleRow.appendChild(pill);
+      });
+      app.appendChild(toggleRow);
+    }
 
     if(statsShowTable){
       app.appendChild(buildExerciseHistoryTable(statsSelected.type, statsSelected.id));
@@ -1632,12 +1656,20 @@ function render(){
       }
 
       const timeBtn = document.createElement('div');
-      timeBtn.style.cssText = 'text-align:right;font-size:10px;color:var(--dim);line-height:1.6;cursor:pointer;';
+      timeBtn.style.cssText = 'font-size:10px;color:var(--dim);cursor:pointer;';
       if(rec.startTime && rec.endTime){
         const dur = formatDuration(rec.startTime, rec.endTime);
-        timeBtn.innerHTML = `<div>start ${rec.startTime}</div><div>end ${rec.endTime}</div><div>duration ${dur}</div>`;
+        const rowsData = [['start', rec.startTime], ['end', rec.endTime], ['duration', dur]];
+        timeBtn.innerHTML = rowsData.map(([label, val]) => `
+          <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-bottom:3px;">
+            <span style="text-transform:uppercase;color:var(--dim);">${label}</span>
+            <span style="display:inline-block;width:1px;height:10px;background:#333;"></span>
+            <span style="font-family:'Courier New',monospace;color:#fff;">${val}</span>
+          </div>
+        `).join('');
       } else {
-        timeBtn.textContent = 'add time';
+        timeBtn.style.textAlign = 'right';
+        timeBtn.textContent = 'ADD TIME';
       }
       timeBtn.onclick = () => showTimeEditModal(rec, () => render());
 
