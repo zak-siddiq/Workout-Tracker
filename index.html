@@ -1498,10 +1498,10 @@ function render(){
 
     const title = document.createElement('div');
     title.className = 'stat-title';
-    title.textContent = ex ? (variants.length > 1 ? ex.name : (ex.tag + ' ' + ex.name)) : '';
+    title.textContent = ex ? ex.name : '';
     app.appendChild(title);
 
-    if(variants.length > 1){
+    if(ex){
       const toggleRow = document.createElement('div');
       toggleRow.style.cssText = 'display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;';
       variants.forEach(v => {
@@ -1627,7 +1627,7 @@ function render(){
     }
 
     const recs = historySelected.items
-      .map(i => ({type: i.type, rec: state.history[i.type][i.index]}))
+      .map(item => ({type: item.type, index: item.index, rec: state.history[item.type][item.index]}))
       .filter(r => r.rec);
 
     if(recs.length === 0){
@@ -1642,7 +1642,7 @@ function render(){
     title.textContent = recs.map(r => r.type.toUpperCase()).join(' + ') + ' \u2013 ' + dstr;
     app.appendChild(title);
 
-    recs.forEach(({type, rec}) => {
+    recs.forEach(({type, index, rec}) => {
       const headerRow = document.createElement('div');
       headerRow.style.cssText = 'display:flex;align-items:flex-start;justify-content:space-between;margin:10px 0 4px;';
 
@@ -1691,9 +1691,30 @@ function render(){
         URL.revokeObjectURL(url);
       };
 
+      const deleteLink = document.createElement('div');
+      deleteLink.style.cssText = 'text-align:right;font-size:10px;color:var(--dim);text-decoration:underline;margin-top:4px;cursor:pointer;';
+      deleteLink.textContent = 'delete entry';
+      deleteLink.onclick = (ev) => {
+        ev.stopPropagation();
+        showModal('Delete this entry? This cannot be undone.', {
+          onConfirm: () => {
+            state.history[type].splice(index, 1);
+            historySelected.items = historySelected.items
+              .filter(it => !(it.type === type && it.index === index))
+              .map(it => (it.type === type && it.index > index) ? {type: it.type, index: it.index - 1} : it);
+            if(historySelected.items.length === 0){
+              historySelected = null;
+            }
+            save();
+            render();
+          }
+        });
+      };
+
       const timeCol = document.createElement('div');
       timeCol.appendChild(timeBtn);
       timeCol.appendChild(tcxLink);
+      timeCol.appendChild(deleteLink);
       headerRow.appendChild(timeCol);
 
       app.appendChild(headerRow);
